@@ -9,7 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB SOURCE_FILES_PATH 
         src/*.cpp
-        src/Model/*.cpp
+        src/Model/*.cpp 
+        src/Tools/*.cpp
         dependencies/imgui/*.cpp 
         dependencies/imgui/backends/imgui_impl_sdl3.cpp 
         dependencies/imgui/backends/imgui_impl_sdlrenderer3.cpp
