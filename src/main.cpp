@@ -17,6 +17,10 @@
 #include <SDL3/SDL.h>
 #include <stdio.h>
 
+#include "Model/Card.h"
+#include "Model/CardColour.h"
+#include "Model/CardType.h"
+#include "Model/CardZone.h"
 
 #ifdef __EMSCRIPTEN__
 #include "../libs/emscripten/emscripten_mainloop_stub.h"

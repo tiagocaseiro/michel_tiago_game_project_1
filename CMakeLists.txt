@@ -8,7 +8,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB SOURCE_FILES_PATH 
-        src/*.cpp 
+        src/*.cpp
+        src/Model/*.cpp
         dependencies/imgui/*.cpp 
         dependencies/imgui/backends/imgui_impl_sdl3.cpp 
         dependencies/imgui/backends/imgui_impl_sdlrenderer3.cpp
@@ -16,7 +17,10 @@ file(GLOB SOURCE_FILES_PATH
 
 add_executable(michel-tiago-game-project-1 ${SOURCE_FILES_PATH}) 
 
-target_include_directories(michel-tiago-game-project-1 PUBLIC dependencies/imgui dependencies/imgui/backends)
+target_include_directories(michel-tiago-game-project-1 PUBLIC 
+        dependencies/imgui
+        dependencies/imgui/backends
+        )
 
 set_target_properties(michel-tiago-game-project-1 PROPERTIES LINKER_LANGUAGE CXX)
 
