@@ -13,6 +13,7 @@ namespace Logging
         Debug   = 1 << 1,
         Warning = 1 << 2,
         Error   = 1 << 3,
+        All     = -1
     };
 
     template <LoggingLevel level>
@@ -30,7 +31,7 @@ namespace Logging
     static auto EnableDebugLevel   = EnableLevel<LoggingLevel::Debug>;
     static auto EnableWarningLevel = EnableLevel<LoggingLevel::Warning>;
     static auto EnableErrorLevel   = EnableLevel<LoggingLevel::Error>;
-    static void EnableAllLevels();
+    static auto EnableAllLevels    = EnableLevel<LoggingLevel::All>;
 
     template <LoggingLevel level>
     void DisableLevel();
@@ -39,7 +40,7 @@ namespace Logging
     static auto DisableDebugLevel   = DisableLevel<LoggingLevel::Debug>;
     static auto DisableWarningLevel = DisableLevel<LoggingLevel::Warning>;
     static auto DisableErrorLevel   = DisableLevel<LoggingLevel::Error>;
-    static void DisableAllLevels();
+    static auto DisableAllLevels    = DisableLevel<LoggingLevel::All>;
 
     void PrintDebugMenu();
 

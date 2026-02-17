@@ -11,13 +11,13 @@ namespace Logging
 {
     static const auto begin = std::chrono::system_clock::now();
 
-    static int actingLevels =
+    static int activeLevels =
         (int)LoggingLevel::Info | (int)LoggingLevel::Debug | (int)LoggingLevel::Warning | (int)LoggingLevel::Error;
 
     template <LoggingLevel level>
     bool IsLevelActive()
     {
-        const bool isActive = actingLevels & (int)level;
+        const bool isActive = activeLevels & (int)level;
         return isActive != 0;
     }
 
@@ -55,29 +55,13 @@ namespace Logging
     template <LoggingLevel level>
     void EnableLevel()
     {
-        actingLevels |= (int)level;
-    }
-
-    void EnableAllLevels()
-    {
-        EnableInfoLevel();
-        EnableDebugLevel();
-        EnableWarningLevel();
-        EnableErrorLevel();
+        activeLevels |= (int)level;
     }
 
     template <LoggingLevel level>
     void DisableLevel()
     {
-        actingLevels &= ~(int)level;
-    }
-
-    void DisableAllLevels()
-    {
-        DisableInfoLevel();
-        DisableDebugLevel();
-        DisableWarningLevel();
-        DisableErrorLevel();
+        activeLevels &= ~(int)level;
     }
 
     template <LoggingLevel level>
