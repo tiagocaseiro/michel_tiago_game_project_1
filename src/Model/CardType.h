@@ -10,7 +10,7 @@ enum class CardType
 
 bool IsTacticsCard(CardType type)
 {
-    switch (type)
+    switch(type)
     {
         case CardType::Troop:
             return false;
@@ -20,7 +20,6 @@ bool IsTacticsCard(CardType type)
             return true;
     }
 
-    // #TODO: Add logging library 
-    // LOG(Unsupported cardtype)
+    Logging::LogWarning("Unsupported CardType");
     return false;
 }
