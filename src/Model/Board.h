@@ -8,8 +8,8 @@ struct Player;
 
 struct Board
 {
-    Player* mPlayer1;
-    Player* mPlayer2;
+    Player* mPlayer1 = nullptr;
+    Player* mPlayer2 = nullptr;
     std::vector<Flag> mFlags;
     CardZone mTroopDeck;
     CardZone mTacticsDeck;

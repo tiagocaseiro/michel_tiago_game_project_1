@@ -4,6 +4,6 @@ enum class CardColour;
 
 struct Card
 {
-    int mPower;
+    int mPower = 0;
     CardColour mColour;
 };

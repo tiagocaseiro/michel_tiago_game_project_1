@@ -10,5 +10,5 @@ struct Flag
     CardZone mPlayer1Troops;
     CardZone mPlayer2Tactics;
     CardZone mPlayer2Troops;
-    Player* mWinner;
+    Player* mWinner = nullptr;
 };
