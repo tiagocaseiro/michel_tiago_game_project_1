@@ -1,12 +1,12 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "Model/CardColour.h"
+
+#include <vector>
 
 struct InitialSetup
 {
-    std::unordered_map<CardColour, int> mCardsPerColour{
+    std::vector<std::pair<CardColour, int>> mCardsPerColour{
         {CardColour::Blue, DEFAULT_CARDS_PER_COLOUR},
         {CardColour::Brown, DEFAULT_CARDS_PER_COLOUR},
         {CardColour::Red, DEFAULT_CARDS_PER_COLOUR},

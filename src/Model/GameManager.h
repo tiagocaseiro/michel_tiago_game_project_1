@@ -2,6 +2,7 @@
 
 #include "Board.h"
 #include "CardManager.h"
+#include "Player.h"
 
 #include "Rules/FormationRules.h"
 #include "Rules/GameplayRules.h"
@@ -14,9 +15,10 @@ public:
                 const InitialSetup& initialSetup = {});
 
 private:
-    void CreateGame();
+    void StartGame();
 
-    CardManager mCardManager;
+    Player mPlayer1;
+    Player mPlayer2;
     Board mBoard;
     // #TODO: We could have the option to data-drive these
     FormationRules mFormationRules;

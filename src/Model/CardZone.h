@@ -1,23 +1,19 @@
 #pragma once
 
+#include "Model/Card.h"
+
 #include <algorithm>
 #include <optional>
 #include <vector>
 
 enum class CardType;
+struct CardZoneRules;
 
 struct CardZone
 {
-    std::optional<int> mSlotLimit;
-    std::vector<CardType> mSupportedCardTypes;
+    explicit CardZone(const CardZoneRules& rules) : mRules(rules) {}
 
-    [[nodiscard]] bool AcceptsCard(CardType type)
-    {
-        if(mSupportedCardTypes.empty())
-        {
-            return true;
-        }
-
-        return std::ranges::contains(mSupportedCardTypes, type);
-    }
+    const CardZoneRules& mRules;
+    // #TODO: Reference wrapper or pointer?
+    std::vector<Card> mCards;
 };

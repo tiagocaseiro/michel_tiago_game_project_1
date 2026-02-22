@@ -3,18 +3,24 @@
 #include <vector>
 
 #include "Flag.h"
+#include "Rules/CardZoneRules.h"
+#include "Rules/InitialSetup.h"
 
 struct Player;
 
 struct Board
 {
-    Player* mPlayer1 = nullptr;
-    Player* mPlayer2 = nullptr;
+    Board(Player& p1, Player& p2, const InitialSetup& initialSetup = {});
+
+    Player& mPlayer1;
+    Player& mPlayer2;
     std::vector<Flag> mFlags;
-    // #TODO: Separate CardZone from CardZoneRules
-    // CardZoneRules lives in Rules folder alongside the others
-    // CardZone holds a pointer to a CardZoneRules + knows what cards it currently contains, optionally has an id/name
-    CardZone mTroopDeck;
-    CardZone mTacticsDeck;
-    CardZone mDiscardPile;
+
+    CardZone mTroopDeck{CardZoneRules::TroopDeck()};
+    CardZone mTacticsDeck{CardZoneRules::TacticsDeck()};
+    CardZone mDiscardPile{CardZoneRules::DiscardPile()};
+
+    private:
+    void ConstructTroopsDeck(const InitialSetup& setup);
+    void ConstructTacticsDeck(const InitialSetup& setup);
 };

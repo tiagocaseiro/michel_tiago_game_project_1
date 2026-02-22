@@ -1,16 +1,16 @@
-#pragma once
+// #pragma once
 
-#include <vector>
+// #include <vector>
 
-#include "Card.h"
+// #include "Card.h"
 
-struct InitialSetup;
+// struct InitialSetup;
 
-class CardManager
-{
-public:
-    CardManager(const InitialSetup& initialSetup);
+// class CardManager
+// {
+// public:
+//     CardManager(const InitialSetup& initialSetup);
 
-private:
-    std::vector<Card> mAllCards;
-};
+// private:
+//     std::vector<Card> mAllCards;
+// };

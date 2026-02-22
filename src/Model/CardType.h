@@ -10,18 +10,4 @@ enum class CardType
     TacticGuile
 };
 
-bool IsTacticsCard(CardType type)
-{
-    switch(type)
-    {
-        case CardType::Troop:
-            return false;
-        case CardType::TacticTroop:
-        case CardType::TacticEnvironment:
-        case CardType::TacticGuile:
-            return true;
-    }
-
-    Logging::LogWarning("Unsupported CardType");
-    return false;
-}
+bool IsTacticsCard(CardType type);

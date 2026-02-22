@@ -5,9 +5,14 @@ GameManager::GameManager(const FormationRules& formationRules, const GameplayRul
     : mFormationRules(formationRules),
       mGameplayRules(gameplayRules),
       mInitialSetup(initialSetup),
-      mCardManager(initialSetup)
+      mPlayer1(),
+      mPlayer2(),
+      mBoard(mPlayer1, mPlayer2, initialSetup)
 {
-    CreateGame();
+    StartGame();
 }
 
-void GameManager::CreateGame() {}
+void GameManager::StartGame() 
+{
+    // #TODO_ACTIONS: distribute cards to players    
+}

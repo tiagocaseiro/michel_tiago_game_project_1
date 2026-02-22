@@ -4,5 +4,5 @@
 
 struct Player
 {
-    CardZone mPlayerHand;
+    CardZone mPlayerHand{CardZoneRules::PlayerHand()};
 };
