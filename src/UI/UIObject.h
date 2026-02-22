@@ -8,7 +8,7 @@
 #include <SDL3/SDL.h>
 
 #define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
-public:                                                                                                                \
+private:                                                                                                               \
     UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                                  \
     friend void DrawDebug();                                                                                           \
     template <typename T>                                                                                              \
@@ -84,14 +84,15 @@ namespace UI
     class RootObject final : public Object
     {
         DECLARE_UI_ELEMENT(RootObject);
+
+    public:
+        void DrawImguiObjectTreeDebugMenu() const override;
+
         void Draw() const override;
         void Update() override;
 
         using Object::AddChild;
 
-        void DrawImguiObjectTreeDebugMenu() const override;
-
-    private:
         friend RootObject& Root();
         friend void Draw();
     };
