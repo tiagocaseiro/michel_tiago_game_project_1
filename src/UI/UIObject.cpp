@@ -2,6 +2,8 @@
 
 #include <chrono>
 
+#include <SDL3_image/SDL_image.h>
+
 #include "imgui.h"
 
 #include "Tools/Logging.h"
@@ -97,28 +99,23 @@ namespace UI
         ImGui::Unindent();
     }
 
-    void Object::AddChild(std::unique_ptr<Object> object)
+    void Object::AddChild(ObjectPtr object)
     {
         if(object == nullptr)
         {
             Logging::LogWarning("Attempted to attach an empty UI Object child");
             return;
         }
-        object->SetParent(*this);
+        object->SetParent(this);
         mChildren.emplace_back(std::move(object));
     }
 
     void Object::Draw() const
     {
-        if(sRenderer == nullptr)
-        {
-            return;
-        }
-
         SDL_SetRenderDrawColorFloat(sRenderer, mColor.r, mColor.g, mColor.b, mColor.a);
         SDL_RenderFillRect(sRenderer, &mPositionDimension);
 
-        for(const std::unique_ptr<Object>& child : mChildren)
+        for(const ObjectPtr& child : mChildren)
         {
             child->Draw();
         }
@@ -135,7 +132,7 @@ namespace UI
         mPositionDimension.x = mParent->mPositionDimension.x + mMargin.left;
         mPositionDimension.y = mParent->mPositionDimension.y + mMargin.top;
 
-        for(const std::unique_ptr<Object>& child : mChildren)
+        for(const ObjectPtr& child : mChildren)
         {
             child->Update();
         }
@@ -144,7 +141,9 @@ namespace UI
     void Object::DrawImguiObjectTreeDebugMenu() const
     {
         ImGui::PushID(mId.c_str());
-        const bool isOpen = ImGui::TreeNode(mId.c_str());
+
+        const bool isOpen =
+            ImGui::TreeNodeEx(mId.c_str(), mChildren.empty() ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
         ImGui::SameLine();
         if(ImGui::SmallButton("Details"))
         {
@@ -168,7 +167,7 @@ namespace UI
         }
         if(isOpen)
         {
-            for(const std::unique_ptr<Object>& child : mChildren)
+            for(const ObjectPtr& child : mChildren)
             {
                 child->DrawImguiObjectTreeDebugMenu();
             }
@@ -179,7 +178,7 @@ namespace UI
 
     void RootObject::Draw() const
     {
-        for(const std::unique_ptr<Object>& child : mChildren)
+        for(const ObjectPtr& child : mChildren)
         {
             if(child)
             {
@@ -189,7 +188,7 @@ namespace UI
     }
     void RootObject::Update()
     {
-        for(const std::unique_ptr<Object>& child : mChildren)
+        for(const ObjectPtr& child : mChildren)
         {
             if(child)
             {
@@ -202,7 +201,7 @@ namespace UI
     {
         if(ImGui::TreeNode(mId.c_str()))
         {
-            for(const std::unique_ptr<Object>& child : mChildren)
+            for(const ObjectPtr& child : mChildren)
             {
                 if(child)
                 {
@@ -229,36 +228,32 @@ namespace UI
 
     Image::~Image() { SDL_DestroyTexture(mTexture); }
 
-    void Image::SetImagePath(const std::filesystem::path& imagePath)
+    void Image::SetImagePath(const std::string& imagePath)
     {
+        mImagePath              = imagePath;
+        SDL_Surface* surface    = SDL_LoadSurface(imagePath.c_str());
+        SDL_Texture* newTexture = SDL_CreateTextureFromSurface(sRenderer, surface);
 
-        // The final texture
-        SDL_Texture* newTexture = nullptr;
-
-        // Load image at specified path
-        // SDL_Surface* loadedSurface = IMG_Load(imagePath.c_str());
-        // if(loadedSurface == nullptr)
-        // {
-        //     // printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-        // }
-        // else
-        // {
-        //     // Create texture from surface pixels
-        //     newTexture = SDL_CreateTextureFromSurface(sRenderer, loadedSurface);
-        //     if(newTexture == nullptr)
-        //     {
-        //         printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-        //     }
-
-        //     // Get rid of old loaded surface
-        //     SDL_DestroySurface(loadedSurface);
-        // }
-
+        SDL_DestroySurface(surface);
         SDL_DestroyTexture(mTexture);
+
         mTexture = newTexture;
     }
 
-    void Image::Draw() const {}
+    void Image::Draw() const
+    {
+        SDL_RenderTexture(sRenderer, mTexture, nullptr, &mPositionDimension);
+        superclass::Draw();
+    }
+
+    void Image::DrawImguiObjectDetailsDebugMenu() const
+    {
+        superclass::DrawImguiObjectDetailsDebugMenu();
+        ImGui::Text("Image Path");
+        ImGui::Indent();
+        ImGui::Text(mImagePath.c_str());
+        ImGui::Unindent();
+    }
 
     RootObject& Root()
     {

@@ -11,11 +11,13 @@
 // Important to understand: SDL_Renderer is an _optional_ component of SDL3.
 // For a multi-platform app consider using e.g. SDL+DirectX on Windows and SDL+OpenGL on Linux/OSX.
 
+#include <stdio.h>
+
+#include <SDL3/SDL.h>
+
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlrenderer3.h"
-#include <SDL3/SDL.h>
-#include <stdio.h>
 
 #include "Tools/ImguiDebug.h"
 #include "Tools/Logging.h"
@@ -47,6 +49,8 @@ int main(int, char**)
         return 1;
     }
     SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     UI::SetRenderer(renderer);
 
@@ -123,9 +127,6 @@ int main(int, char**)
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
     }
-#ifdef __EMSCRIPTEN__
-    EMSCRIPTEN_MAINLOOP_END;
-#endif
 
     // Cleanup
     // [If using SDL_MAIN_USE_CALLBACKS: all code below would likely be your SDL_AppQuit() function]

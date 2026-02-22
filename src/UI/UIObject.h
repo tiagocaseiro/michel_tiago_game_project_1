@@ -8,21 +8,17 @@
 #include <SDL3/SDL.h>
 
 #define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
-private:                                                                                                               \
+public:                                                                                                                \
+    using superclass = UIClassNameParent;                                                                              \
     UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                                  \
     friend void DrawDebug();                                                                                           \
-    template <typename T>                                                                                              \
-    friend std::unique_ptr<T> Make(const std::string& id)
+    static auto Make(const std::string& id) { return std::unique_ptr<UIClassName##>(new UIClassName##(id)); }
 
 #define DECLARE_UI_ELEMENT(UIClassName) DECLARE_UI_ELEMENT_DERIVED(##UIClassName, Object)
 
 namespace UI
 {
-    template <typename T>
-    std::unique_ptr<T> Make(const std::string& id)
-    {
-        return std::unique_ptr<T>(new T(id));
-    }
+    using ObjectPtr = std::unique_ptr<class Object>;
 
     struct Margin
     {
@@ -53,7 +49,7 @@ namespace UI
         void SetWidth(float width) { mPositionDimension.w = width; }
         void SetMargin(Margin margin) { mMargin = margin; }
         void SetColor(Color color) { mColor = color; }
-        void SetParent(Object& parent) { mParent = &parent; }
+        void SetParent(Object* parent) { mParent = parent; }
 
         virtual void Update();
 
@@ -62,10 +58,9 @@ namespace UI
 
         friend void DrawDebug();
 
-        void AddChild(std::unique_ptr<Object> object);
+        void AddChild(ObjectPtr object);
 
-        template <typename T>
-        friend std::unique_ptr<T> Make(const std::string& id);
+        static auto Make(const std::string& id) { return std::unique_ptr<Object>(new Object(id)); }
 
     protected:
         Object(const std::string& id) : mId(id) {}
@@ -76,9 +71,9 @@ namespace UI
         Color mColor                         = {0.0f, 0.0f, 0.0f, 0.0f};
         Margin mMargin                       = {0.0f, 0.0f, 0.0f, 0.0f};
 
-        std::vector<std::unique_ptr<Object>> mChildren;
+        std::vector<ObjectPtr> mChildren;
 
-        Object* mParent = nullptr;
+        Object* mParent;
     };
 
     class RootObject final : public Object
@@ -104,12 +99,15 @@ namespace UI
         ~Image();
 
     public:
-        void SetImagePath(const std::filesystem::path& imagePath);
+        void SetImagePath(const std::string& imagePath);
 
     protected:
         virtual void Draw() const override;
 
     private:
+        virtual void DrawImguiObjectDetailsDebugMenu() const;
+
+        std::string mImagePath;
         SDL_Texture* mTexture = nullptr;
     };
 
