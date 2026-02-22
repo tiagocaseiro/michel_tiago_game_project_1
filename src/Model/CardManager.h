@@ -9,8 +9,8 @@ struct InitialSetup;
 class CardManager
 {
 public:
-    CardManager(InitialSetup& initialSetup);
-    
+    CardManager(const InitialSetup& initialSetup);
+
 private:
     std::vector<Card> mAllCards;
 };

@@ -262,8 +262,8 @@ namespace UI
 
     RootObject& Root()
     {
-        static std::unique_ptr<RootObject> root = Make<RootObject>("root");
-        return *root;
+        static RootObject root = RootObject("root");
+        return root;
     }
 
     void Text::Draw() const {}

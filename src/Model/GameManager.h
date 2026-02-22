@@ -10,7 +10,8 @@
 class GameManager
 {
 public:
-    GameManager(FormationRules formationRules={}, GameplayRules gameplayRules={}, InitialSetup initialSetup={});
+    GameManager(const FormationRules& formationRules = {}, const GameplayRules& gameplayRules = {},
+                const InitialSetup& initialSetup = {});
 
 private:
     void CreateGame();

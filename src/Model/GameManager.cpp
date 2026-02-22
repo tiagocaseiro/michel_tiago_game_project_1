@@ -1,11 +1,13 @@
 #include "GameManager.h"
 
-GameManager::GameManager(FormationRules& formationRules, GameplayRules& gameplayRules, InitialSetup& initialSetup) : mFormationRules(formationRules), mGameplayRules(gameplayRules), mInitialSetup(initialSetup), mCardManager(initialSetup)
+GameManager::GameManager(const FormationRules& formationRules, const GameplayRules& gameplayRules,
+                         const InitialSetup& initialSetup)
+    : mFormationRules(formationRules),
+      mGameplayRules(gameplayRules),
+      mInitialSetup(initialSetup),
+      mCardManager(initialSetup)
 {
-    CreateGame();    
+    CreateGame();
 }
 
-void GameManager::CreateGame() 
-{
-
-}
+void GameManager::CreateGame() {}
