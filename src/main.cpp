@@ -1,18 +1,3 @@
-// Dear ImGui: standalone example application for SDL3 + SDL_Renderer
-// (SDL is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context
-// creation, etc.)
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
-// Important to understand: SDL_Renderer is an _optional_ component of SDL3.
-// For a multi-platform app consider using e.g. SDL+DirectX on Windows and SDL+OpenGL on Linux/OSX.
-
-#include <stdio.h>
-
 #include <SDL3/SDL.h>
 
 #include "imgui.h"
@@ -29,7 +14,6 @@
 
 #include "UI/UIObject.h"
 
-// Main code
 int main(int, char**)
 {
     if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
@@ -87,6 +71,45 @@ int main(int, char**)
     ImGui_ImplSDLRenderer3_Init(renderer);
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    auto panel1 = UI::Object::Make("panel1");
+    panel1->SetWidth(100);
+    panel1->SetHeight(100);
+    panel1->SetMargin({100, 100, 0, 0});
+    panel1->SetColor({0.5, 0.26, 0.75, 1});
+
+    auto panel11 = UI::Object::Make("panel11");
+    panel11->SetWidth(25);
+    panel11->SetHeight(25);
+    panel11->SetMargin({10, 10, 0, 0});
+    panel11->SetColor({1, 1, 0.75, 1});
+
+    panel1->AddChild(std::move(panel11));
+
+    auto panel2 = UI::Object::Make("panel2");
+    panel2->SetWidth(100);
+    panel2->SetHeight(100);
+    panel2->SetMargin({200, 200, 0, 0});
+    panel2->SetColor({1, 0.76, 0, 1});
+
+    auto panel3 = UI::Object::Make("panel3");
+    panel3->SetWidth(100);
+    panel3->SetHeight(100);
+    panel3->SetMargin({300, 300, 0, 0});
+    panel3->SetColor({0.5, 1., 0.2, 0.4});
+
+    auto image = UI::Image::Make("image");
+    image->SetWidth(500);
+    image->SetHeight(500);
+    image->SetMargin({300, 300, 0, 0});
+    image->SetImagePath("textures/crate.png");
+    image->SetColor({1, 0, 0, 0.40});
+
+    image->AddChild(std::move(panel1));
+    image->AddChild(std::move(panel2));
+    image->AddChild(std::move(panel3));
+
+    UI::Root().AddChild(std::move(image));
+
     // Main loop
     bool done = false;
     while(!done)
@@ -101,7 +124,6 @@ int main(int, char**)
                 done = true;
         }
 
-        // [If using SDL_MAIN_USE_CALLBACKS: all code below would likely be your SDL_AppIterate() function]
         if(SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)
         {
             SDL_Delay(10);
@@ -128,8 +150,6 @@ int main(int, char**)
         SDL_RenderPresent(renderer);
     }
 
-    // Cleanup
-    // [If using SDL_MAIN_USE_CALLBACKS: all code below would likely be your SDL_AppQuit() function]
     ImGui_ImplSDLRenderer3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
