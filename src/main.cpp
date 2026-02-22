@@ -25,12 +25,11 @@
 #include "Model/CardType.h"
 #include "Model/CardZone.h"
 
+#include "UI/UIObject.h"
+
 // Main code
 int main(int, char**)
 {
-    // Setup SDL
-    // [If using SDL_MAIN_USE_CALLBACKS: all code below until the main loop starts would likely be your SDL_AppInit()
-    // function]
     if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
     {
         printf("Error: SDL_Init(): %s\n", SDL_GetError());
@@ -48,6 +47,9 @@ int main(int, char**)
         return 1;
     }
     SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
+
+    UI::SetRenderer(renderer);
+
     SDL_SetRenderVSync(renderer, 1);
     if(renderer == nullptr)
     {
@@ -79,8 +81,6 @@ int main(int, char**)
     // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
-
-    // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -104,6 +104,8 @@ int main(int, char**)
             continue;
         }
 
+        UI::Update();
+
         // Start the Dear ImGui frame
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -116,6 +118,8 @@ int main(int, char**)
         SDL_SetRenderScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
         SDL_SetRenderDrawColorFloat(renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         SDL_RenderClear(renderer);
+        UI::Draw();
+        UI::DrawDebug();
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
     }

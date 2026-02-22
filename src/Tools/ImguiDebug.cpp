@@ -1,10 +1,12 @@
 #include "ImguiDebug.h"
 
-#include "Logging.h"
-
 #include "imgui.h"
 
+#include "Logging.h"
+#include "UI/UIObject.h"
+
 static bool show_log_window = false;
+static bool show_ui_window  = false;
 
 namespace ImguiDebug
 {
@@ -20,6 +22,12 @@ namespace ImguiDebug
                 }
                 ImGui::EndMenu();
             }
+
+            if(ImGui::MenuItem("UI"))
+            {
+                show_ui_window = !show_ui_window;
+            }
+
             ImGui::EndMainMenuBar();
         }
     }
@@ -33,8 +41,13 @@ namespace ImguiDebug
         if(show_log_window)
         {
             ImGui::Begin("Log", &show_log_window);
-            Logging::PrintDebugMenu();
+            Logging::DrawImguiDebugMenu();
             ImGui::End();
+        }
+
+        if(show_ui_window)
+        {
+            UI::Root().DrawImguiObjectTreeDebugMenu();
         }
     }
 

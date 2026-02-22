@@ -42,6 +42,6 @@ namespace Logging
     static auto DisableErrorLevel   = DisableLevel<LoggingLevel::Error>;
     static auto DisableAllLevels    = DisableLevel<LoggingLevel::All>;
 
-    void PrintDebugMenu();
+    void DrawImguiDebugMenu();
 
 } // namespace Logging

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Tools/Logging.h"
+
 enum class CardType
 {
     Troop,

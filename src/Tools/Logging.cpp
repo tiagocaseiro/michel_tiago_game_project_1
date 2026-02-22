@@ -65,7 +65,7 @@ namespace Logging
     }
 
     template <LoggingLevel level>
-    void PrintDebugButton()
+    void DrawImguiDebugMenu()
     {
         ImGui::PushID((int)level);
         switch(level)
@@ -100,12 +100,12 @@ namespace Logging
         ImGui::PopID();
     }
 
-    void PrintDebugMenu()
+    void DrawImguiDebugMenu()
     {
-        PrintDebugButton<LoggingLevel::Info>();
-        PrintDebugButton<LoggingLevel::Debug>();
-        PrintDebugButton<LoggingLevel::Warning>();
-        PrintDebugButton<LoggingLevel::Error>();
+        DrawImguiDebugMenu<LoggingLevel::Info>();
+        DrawImguiDebugMenu<LoggingLevel::Debug>();
+        DrawImguiDebugMenu<LoggingLevel::Warning>();
+        DrawImguiDebugMenu<LoggingLevel::Error>();
 
         if(ImGui::Button("Enable All"))
         {

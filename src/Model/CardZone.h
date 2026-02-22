@@ -1,10 +1,8 @@
 #pragma once
 
-#include "CardType.h"
-
+#include <algorithm>
 #include <optional>
 #include <vector>
-#include <algorithm>
 
 enum class CardType;
 
@@ -15,7 +13,7 @@ struct CardZone
 
     [[nodiscard]] bool AcceptsCard(CardType type)
     {
-        if (mSupportedCardTypes.empty())
+        if(mSupportedCardTypes.empty())
         {
             return true;
         }
