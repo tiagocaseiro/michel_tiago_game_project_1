@@ -18,7 +18,7 @@ struct CardZoneRules
     static const CardZoneRules& FlagTactics();
     static const CardZoneRules& DiscardPile();
 
-    [[nodiscard]] bool AcceptsCard(CardType type)
+    [[nodiscard]] bool AcceptsCard(CardType type) const
     {
         if(mSupportedCardTypes.empty())
         {
