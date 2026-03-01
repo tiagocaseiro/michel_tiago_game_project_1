@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "Common/Color.h"
 #include "Common/Texture.h"
 
 #define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
@@ -39,12 +40,11 @@ namespace UI
         Object& operator=(const Object&) = delete;
         virtual ~Object();
 
-        virtual void Draw() const;
+        virtual void Draw() const = 0;
 
         void SetHeight(float height) { mPositionDimension.h = height; }
         void SetWidth(float width) { mPositionDimension.w = width; }
         void SetMargin(Margin margin) { mMargin = margin; }
-        void SetColor(Color color) { mColor = color; }
         void SetParent(Object* parent) { mParent = parent; }
         virtual void Update();
 
@@ -55,20 +55,18 @@ namespace UI
 
         void AddChild(ObjectPtr object);
 
-        static auto Make(const std::string& id) { return std::unique_ptr<Object>(new Object(id)); }
-
     protected:
         Object(const std::string& id) : mId(id) {}
+
+        void DrawChildren() const;
 
         const std::string mId;
 
         PositionDimension mPositionDimension = {0.0f, 0.0f, 0.0f, 0.0f};
-        Color mColor                         = {0.0f, 0.0f, 0.0f, 0.0f};
         Margin mMargin                       = {0.0f, 0.0f, 0.0f, 0.0f};
+        Object* mParent                      = nullptr;
 
         std::vector<ObjectPtr> mChildren;
-
-        Object* mParent;
     };
 
     class RootObject final : public Object
@@ -87,12 +85,13 @@ namespace UI
         friend void Draw();
     };
 
-    class Image : public Object
+    class Material : public Object
     {
-        DECLARE_UI_ELEMENT(Image);
+        DECLARE_UI_ELEMENT(Material);
 
     public:
         void SetImagePath(const std::string& imagePath);
+        void SetColor(Color color) { mColor = color; }
 
     protected:
         virtual void Draw() const override;
@@ -101,6 +100,7 @@ namespace UI
         virtual void DrawImguiObjectDetailsDebugMenu() const;
 
         TextureUniquePtr mTexture = Common::EmptyTexture();
+        Color mColor              = Common::Color::TRANSPARENT;
         std::string mTexturePath;
     };
 
@@ -111,6 +111,7 @@ namespace UI
     public:
         void SetFontPath(const std::string& fontPath);
         void SetText(const std::string& text);
+        void SetColor(Color color) { mColor = color; }
 
     protected:
         virtual void Draw() const override;
@@ -119,6 +120,8 @@ namespace UI
         TTF_Font* mFont = nullptr;
 
         TextureUniquePtr mTexture = Common::EmptyTexture();
+
+        Color mColor = Common::Color::BLACK;
 
         std::string mFontPath;
         std::string mText;

@@ -8,5 +8,5 @@ namespace Common
 {
     void LoadFont(const std::string& fontPath, const float size);
     void UnloadAllFonts();
-    TTF_Font* GetFont(const std::string& fontPath);
+    TTF_Font* TryGetFont(const std::string& fontPath);
 } // namespace Common

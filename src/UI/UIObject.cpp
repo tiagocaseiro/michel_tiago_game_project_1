@@ -105,13 +105,8 @@ namespace UI
         mChildren.emplace_back(std::move(object));
     }
 
-    void Object::Draw() const
+    void Object::DrawChildren() const
     {
-        SDL_Renderer* renderer = Common::GetRenderer();
-
-        SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
-        SDL_RenderFillRect(renderer, &mPositionDimension);
-
         for(const ObjectPtr& child : mChildren)
         {
             child->Draw();
@@ -223,7 +218,7 @@ namespace UI
         }
     }
 
-    void Image::SetImagePath(const std::string& texturePath)
+    void Material::SetImagePath(const std::string& texturePath)
     {
         if(mTexturePath != texturePath)
         {
@@ -232,13 +227,19 @@ namespace UI
         }
     }
 
-    void Image::Draw() const
+    void Material::Draw() const
     {
-        SDL_RenderTexture(Common::GetRenderer(), mTexture.get(), nullptr, &mPositionDimension);
-        superclass::Draw();
+        SDL_Renderer* renderer = Common::GetRenderer();
+
+        SDL_RenderTexture(renderer, mTexture.get(), nullptr, &mPositionDimension);
+
+        SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
+        SDL_RenderFillRect(renderer, &mPositionDimension);
+
+        DrawChildren();
     }
 
-    void Image::DrawImguiObjectDetailsDebugMenu() const
+    void Material::DrawImguiObjectDetailsDebugMenu() const
     {
         superclass::DrawImguiObjectDetailsDebugMenu();
         ImGui::Text("Image Path");
@@ -258,7 +259,7 @@ namespace UI
         if(mFontPath != fontPath)
         {
             mFontPath = fontPath;
-            mFont     = Common::GetFont(mFontPath);
+            mFont     = Common::TryGetFont(mFontPath);
         }
     }
 

@@ -35,7 +35,7 @@ namespace Common
 
     void UnloadAllFonts() { sFonts.clear(); }
 
-    TTF_Font* GetFont(const std::string& fontPath)
+    TTF_Font* TryGetFont(const std::string& fontPath)
     {
         auto found = sFonts.find(fontPath);
         if(found == std::end(sFonts))
