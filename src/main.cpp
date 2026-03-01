@@ -115,6 +115,7 @@ int main(int, char**)
     auto panel3 = UI::Material::Make("panel3");
     panel3->SetWidth(100);
     panel3->SetHeight(100);
+    panel3->SetVisibility(false);
     panel3->SetMargin({300, 300, 0, 0});
     panel3->SetColor({0.5, 1., 0.2, 0.4});
 

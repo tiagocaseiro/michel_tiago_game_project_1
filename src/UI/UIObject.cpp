@@ -10,8 +10,8 @@ struct SDL_Renderer;
 
 namespace UI
 {
-    static const Object* sSelectedObjectDetails = {};
-    static bool sDetailsWindowOpen              = false;
+    static Object* sSelectedObjectDetails = nullptr;
+    static bool sDetailsWindowOpen        = false;
 
     void Update() { Root().Update(); }
 
@@ -71,27 +71,40 @@ namespace UI
         }
     }
 
-    void Object::DrawImguiObjectDetailsDebugMenu() const
+    void Object::DrawImguiObjectDetailsDebugMenu()
     {
-        ImGui::Text("Dimensions");
-        ImGui::Indent();
-        ImGui::Text((std::string("width: ") + std::to_string(mPositionDimension.w)).c_str());
-        ImGui::Text((std::string("height: ") + std::to_string(mPositionDimension.h)).c_str());
-        ImGui::Unindent();
+        if(ImGui::CollapsingHeader("Object", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Dimensions");
+            ImGui::Indent();
+            ImGui::Text((std::string("width: ") + std::to_string(mPositionDimension.w)).c_str());
+            ImGui::Text((std::string("height: ") + std::to_string(mPositionDimension.h)).c_str());
+            ImGui::Unindent();
 
-        ImGui::Text("Position");
-        ImGui::Indent();
-        ImGui::Text((std::string("x: ") + std::to_string(mPositionDimension.x).c_str()).c_str());
-        ImGui::Text((std::string("y: ") + std::to_string(mPositionDimension.y)).c_str());
-        ImGui::Unindent();
+            ImGui::Text("Position");
+            ImGui::Indent();
+            ImGui::Text((std::string("x: ") + std::to_string(mPositionDimension.x).c_str()).c_str());
+            ImGui::Text((std::string("y: ") + std::to_string(mPositionDimension.y)).c_str());
+            ImGui::Unindent();
 
-        ImGui::Text("Margin");
-        ImGui::Indent();
-        ImGui::Text((std::string("left ") + std::to_string(mMargin.left)).c_str());
-        ImGui::Text((std::string("top ") + std::to_string(mMargin.top)).c_str());
-        ImGui::Text((std::string("roght ") + std::to_string(mMargin.right)).c_str());
-        ImGui::Text((std::string("bottom ") + std::to_string(mMargin.bottom)).c_str());
-        ImGui::Unindent();
+            ImGui::Text("Margin");
+            ImGui::Indent();
+            ImGui::Text((std::string("left ") + std::to_string(mMargin.left)).c_str());
+            ImGui::Text((std::string("top ") + std::to_string(mMargin.top)).c_str());
+            ImGui::Text((std::string("roght ") + std::to_string(mMargin.right)).c_str());
+            ImGui::Text((std::string("bottom ") + std::to_string(mMargin.bottom)).c_str());
+            ImGui::Unindent();
+
+            ImGui::Text("Visibility");
+            ImGui::Indent();
+            ImGui::Checkbox("##Visible", &mVisibility);
+            ImGui::Unindent();
+
+            ImGui::Text("Path");
+            ImGui::Indent();
+            ImGui::Text(mPath.c_str());
+            ImGui::Unindent();
+        }
     }
 
     void Object::AddChild(ObjectPtr object)
@@ -101,8 +114,38 @@ namespace UI
             Logging::LogWarning("Attempted to attach an empty UI Object child");
             return;
         }
-        object->SetParent(this);
+        object->SetParent(*this);
         mChildren.emplace_back(std::move(object));
+    }
+
+    void Object::RemoveChild(std::string_view childId)
+    {
+        const auto found = std::ranges::find_if(mChildren, [childId](const auto& child) {
+            return child && child->mId == childId;
+        });
+
+        if(found == std::end(mChildren))
+        {
+            Logging::LogWarning("Failed to find child object with id {} in object {}", childId, mPath);
+            return;
+        }
+
+        mChildren.erase(found);
+    }
+
+    void Object::RemoveChild(int childIndex)
+    {
+        if(childIndex >= mChildren.size())
+        {
+            Logging::LogWarning("Attempted to remove child with index {} beyond size of {} in object {}", childIndex,
+                                mChildren.size(), mPath);
+            return;
+        }
+
+        auto it = std::begin(mChildren);
+
+        std::advance(it, childIndex);
+        mChildren.erase(it);
     }
 
     void Object::DrawChildren() const
@@ -110,6 +153,29 @@ namespace UI
         for(const ObjectPtr& child : mChildren)
         {
             child->Draw();
+        }
+    }
+
+    void Object::SetParent(Object& parent)
+    {
+        mParent = &parent;
+        UpdatePath();
+    }
+
+    void Object::UpdatePath()
+    {
+        mPath = mId;
+        if(mParent)
+        {
+            mPath = mParent->mPath + "." + mPath;
+        }
+
+        for(auto& children : mChildren)
+        {
+            if(children)
+            {
+                children->UpdatePath();
+            }
         }
     }
 
@@ -130,7 +196,7 @@ namespace UI
         }
     }
 
-    void Object::DrawImguiObjectTreeDebugMenu() const
+    void Object::DrawImguiObjectTreeDebugMenu()
     {
         ImGui::PushID(mId.c_str());
 
@@ -189,7 +255,7 @@ namespace UI
         }
     }
 
-    void RootObject::DrawImguiObjectTreeDebugMenu() const
+    void RootObject::DrawImguiObjectTreeDebugMenu()
     {
         if(ImGui::TreeNode(mId.c_str()))
         {
@@ -229,23 +295,32 @@ namespace UI
 
     void Material::Draw() const
     {
-        SDL_Renderer* renderer = Common::GetRenderer();
-
-        SDL_RenderTexture(renderer, mTexture.get(), nullptr, &mPositionDimension);
-
-        SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
-        SDL_RenderFillRect(renderer, &mPositionDimension);
+        if(mVisibility && mParent->GetVisibility())
+        {
+            SDL_Renderer* renderer = Common::GetRenderer();
+            SDL_RenderTexture(renderer, mTexture.get(), nullptr, &mPositionDimension);
+            SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
+            SDL_RenderFillRect(renderer, &mPositionDimension);
+        }
 
         DrawChildren();
     }
 
-    void Material::DrawImguiObjectDetailsDebugMenu() const
+    void Material::DrawImguiObjectDetailsDebugMenu()
     {
         superclass::DrawImguiObjectDetailsDebugMenu();
-        ImGui::Text("Image Path");
-        ImGui::Indent();
-        ImGui::Text(mTexturePath.c_str());
-        ImGui::Unindent();
+
+        if(ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Image Path");
+            ImGui::Indent();
+            ImGui::Text(mTexturePath.empty() ? "(empty)" : mTexturePath.c_str());
+            ImGui::Unindent();
+
+            ImGui::Text("Color");
+            ImGui::SameLine();
+            ImGui::ColorButton("Color", (ImVec4&)mColor);
+        }
     }
 
     RootObject& Root()
@@ -281,5 +356,26 @@ namespace UI
     }
 
     void Text::Draw() const { SDL_RenderTexture(Common::GetRenderer(), mTexture.get(), nullptr, &mPositionDimension); }
+
+    void Text::DrawImguiObjectDetailsDebugMenu()
+    {
+        superclass::DrawImguiObjectDetailsDebugMenu();
+        if(ImGui::CollapsingHeader("Text", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Text");
+            ImGui::Indent();
+            ImGui::Text(mText.c_str());
+            ImGui::Unindent();
+
+            ImGui::Text("Color");
+            ImGui::SameLine();
+            ImGui::ColorButton("Color", (ImVec4&)mColor);
+
+            ImGui::Text("Font");
+            ImGui::Indent();
+            ImGui::Text(mFontPath.c_str());
+            ImGui::Unindent();
+        }
+    }
 
 } // namespace UI
