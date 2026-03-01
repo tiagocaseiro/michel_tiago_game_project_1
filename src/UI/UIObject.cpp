@@ -77,22 +77,28 @@ namespace UI
         {
             ImGui::Text("Dimensions");
             ImGui::Indent();
-            ImGui::Text((std::string("width: ") + std::to_string(mPositionDimension.w)).c_str());
-            ImGui::Text((std::string("height: ") + std::to_string(mPositionDimension.h)).c_str());
+            ImGui::Text("Width: ");
+            ImGui::InputFloat("##DimensionsWidth", &mPositionDimension.w, 1.0f, 10.0f);
+            ImGui::Text("Height: ");
+            ImGui::InputFloat("##DimensionsHeight", &mPositionDimension.h, 1.0f, 10.0f);
             ImGui::Unindent();
 
             ImGui::Text("Position");
             ImGui::Indent();
-            ImGui::Text((std::string("x: ") + std::to_string(mPositionDimension.x).c_str()).c_str());
-            ImGui::Text((std::string("y: ") + std::to_string(mPositionDimension.y)).c_str());
+            ImGui::Text((std::string("X: ") + std::to_string(mPositionDimension.x).c_str()).c_str());
+            ImGui::Text((std::string("Y: ") + std::to_string(mPositionDimension.y)).c_str());
             ImGui::Unindent();
 
             ImGui::Text("Margin");
             ImGui::Indent();
-            ImGui::Text((std::string("left ") + std::to_string(mMargin.left)).c_str());
-            ImGui::Text((std::string("top ") + std::to_string(mMargin.top)).c_str());
-            ImGui::Text((std::string("roght ") + std::to_string(mMargin.right)).c_str());
-            ImGui::Text((std::string("bottom ") + std::to_string(mMargin.bottom)).c_str());
+            ImGui::Text("Left");
+            ImGui::InputFloat("##DimensionsLeft", &mMargin.left, 1.0f, 10.0f);
+            ImGui::Text("Top");
+            ImGui::InputFloat("##DimensionsTop", &mMargin.top, 1.0f, 10.0f);
+            ImGui::Text("Right");
+            ImGui::InputFloat("##DimensionsRight", &mMargin.right, 1.0f, 10.0f);
+            ImGui::Text("Bottom");
+            ImGui::InputFloat("##DimensionsBottom", &mMargin.bottom, 1.0f, 10.0f);
             ImGui::Unindent();
 
             ImGui::Text("Visibility");
@@ -319,7 +325,7 @@ namespace UI
 
             ImGui::Text("Color");
             ImGui::SameLine();
-            ImGui::ColorButton("Color", (ImVec4&)mColor);
+            ImGui::ColorEdit4("Color", (float*)&mColor);
         }
     }
 
@@ -340,18 +346,27 @@ namespace UI
 
     void Text::SetText(const std::string& text)
     {
-        if(mText != text)
+        mText = text;
+        UpdateTexture();
+    }
+
+    void Text::SetColor(Color color)
+    {
+        mColor = color;
+        UpdateTexture();
+    }
+
+    void Text::UpdateTexture()
+    {
+        if(mFont == nullptr)
         {
-            mText = text;
-            if(mFont)
-            {
-                mTexture.release();
-                mTexture = Common::LoadTextTexture(*mFont, mColor, mText);
-            }
-            else
-            {
-                Logging::LogWarning("Attempted to initialize text but font hasn't been initialized.");
-            }
+            Logging::LogWarning("Attempted to initialize text but font hasn't been initialized.");
+            return;
+        }
+
+        if(mText.empty() == false)
+        {
+            mTexture = Common::LoadTextTexture(*mFont, mColor, mText);
         }
     }
 
@@ -364,12 +379,23 @@ namespace UI
         {
             ImGui::Text("Text");
             ImGui::Indent();
-            ImGui::Text(mText.c_str());
+
+            static char buffer[512] = {0};
+
+            std::strcpy(buffer, mText.data());
+
+            if(ImGui::InputText("##TextInput", buffer, 512))
+            {
+                SetText(buffer);
+            }
             ImGui::Unindent();
 
             ImGui::Text("Color");
             ImGui::SameLine();
-            ImGui::ColorButton("Color", (ImVec4&)mColor);
+            if(ImGui::ColorEdit4("Color", (float*)&mColor))
+            {
+                UpdateTexture();
+            }
 
             ImGui::Text("Font");
             ImGui::Indent();

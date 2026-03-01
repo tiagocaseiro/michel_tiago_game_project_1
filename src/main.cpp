@@ -84,7 +84,7 @@ int main(int, char**)
 
     Common::LoadFont("fonts/unispace.ttf", 200);
 
-    auto text = UI::Text::Make("tiago");
+    auto text = UI::Text::Make("text");
     text->SetFontPath("fonts/unispace.ttf");
     text->SetWidth(300);
     text->SetHeight(30);

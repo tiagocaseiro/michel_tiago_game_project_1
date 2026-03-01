@@ -125,9 +125,11 @@ namespace UI
     public:
         void SetFontPath(const std::string& fontPath);
         void SetText(const std::string& text);
-        void SetColor(Color color) { mColor = color; }
+        void SetColor(Color color);
 
     private:
+        void UpdateTexture();
+
         virtual void Draw() const override;
         virtual void DrawImguiObjectDetailsDebugMenu() override;
 
