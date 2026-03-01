@@ -1,17 +1,14 @@
 #pragma once
 
-#include <filesystem>
-#include <memory>
 #include <string>
 #include <vector>
 
-#include <SDL3/SDL.h>
+#include "Common/Texture.h"
 
 #define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
 public:                                                                                                                \
     using superclass = UIClassNameParent;                                                                              \
     UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                                  \
-    friend void DrawDebug();                                                                                           \
     static auto Make(const std::string& id) { return std::unique_ptr<UIClassName##>(new UIClassName##(id)); }
 
 #define DECLARE_UI_ELEMENT(UIClassName) DECLARE_UI_ELEMENT_DERIVED(##UIClassName, Object)
@@ -31,7 +28,6 @@ namespace UI
     using PositionDimension = SDL_FRect;
     using Color             = SDL_FColor;
 
-    void SetRenderer(SDL_Renderer* renderer);
     void Update();
     void Draw();
     void DrawDebug();
@@ -50,7 +46,6 @@ namespace UI
         void SetMargin(Margin margin) { mMargin = margin; }
         void SetColor(Color color) { mColor = color; }
         void SetParent(Object* parent) { mParent = parent; }
-
         virtual void Update();
 
         virtual void DrawImguiObjectTreeDebugMenu() const;
@@ -96,8 +91,6 @@ namespace UI
     {
         DECLARE_UI_ELEMENT(Image);
 
-        ~Image();
-
     public:
         void SetImagePath(const std::string& imagePath);
 
@@ -107,18 +100,27 @@ namespace UI
     private:
         virtual void DrawImguiObjectDetailsDebugMenu() const;
 
-        std::string mImagePath;
-        SDL_Texture* mTexture = nullptr;
+        TextureUniquePtr mTexture = Common::EmptyTexture();
+        std::string mTexturePath;
     };
 
     class Text : public Object
     {
         DECLARE_UI_ELEMENT(Text);
 
+    public:
+        void SetFontPath(const std::string& fontPath);
+        void SetText(const std::string& text);
+
     protected:
         virtual void Draw() const override;
 
     private:
+        TTF_Font* mFont = nullptr;
+
+        TextureUniquePtr mTexture = Common::EmptyTexture();
+
+        std::string mFontPath;
         std::string mText;
     };
 

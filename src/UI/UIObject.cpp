@@ -1,14 +1,15 @@
 #include "UIObject.h"
 
-#include <chrono>
-
 #include "imgui.h"
 
+#include "Common/Data.h"
+#include "Common/Fonts.h"
 #include "Tools/Logging.h"
+
+struct SDL_Renderer;
 
 namespace UI
 {
-    static SDL_Renderer* sRenderer              = nullptr;
     static const Object* sSelectedObjectDetails = {};
     static bool sDetailsWindowOpen              = false;
 
@@ -46,20 +47,20 @@ namespace UI
 
             last = now;
 
-            SDL_SetRenderDrawColorFloat(sRenderer, ratio, ratio, ratio, ratio);
-            SDL_RenderRect(sRenderer, &sSelectedObjectDetails->mPositionDimension);
-            SDL_RenderLine(sRenderer, sSelectedObjectDetails->mPositionDimension.x,
+            SDL_Renderer* renderer = Common::GetRenderer();
+
+            SDL_SetRenderDrawColorFloat(renderer, ratio, ratio, ratio, ratio);
+            SDL_RenderRect(renderer, &sSelectedObjectDetails->mPositionDimension);
+            SDL_RenderLine(renderer, sSelectedObjectDetails->mPositionDimension.x,
                            sSelectedObjectDetails->mPositionDimension.y,
                            sSelectedObjectDetails->mPositionDimension.x + sSelectedObjectDetails->mPositionDimension.w,
                            sSelectedObjectDetails->mPositionDimension.y + sSelectedObjectDetails->mPositionDimension.h);
-            SDL_RenderLine(sRenderer,
+            SDL_RenderLine(renderer,
                            sSelectedObjectDetails->mPositionDimension.x + sSelectedObjectDetails->mPositionDimension.w,
                            sSelectedObjectDetails->mPositionDimension.y, sSelectedObjectDetails->mPositionDimension.x,
                            sSelectedObjectDetails->mPositionDimension.y + sSelectedObjectDetails->mPositionDimension.h);
         }
     }
-
-    void SetRenderer(SDL_Renderer* renderer) { sRenderer = renderer; }
 
     Object::~Object()
     {
@@ -84,10 +85,6 @@ namespace UI
         ImGui::Text((std::string("y: ") + std::to_string(mPositionDimension.y)).c_str());
         ImGui::Unindent();
 
-        ImGui::Text("Color");
-        ImGui::SameLine();
-        ImGui::ColorButton("Color", (ImVec4&)mColor);
-
         ImGui::Text("Margin");
         ImGui::Indent();
         ImGui::Text((std::string("left ") + std::to_string(mMargin.left)).c_str());
@@ -110,8 +107,10 @@ namespace UI
 
     void Object::Draw() const
     {
-        SDL_SetRenderDrawColorFloat(sRenderer, mColor.r, mColor.g, mColor.b, mColor.a);
-        SDL_RenderFillRect(sRenderer, &mPositionDimension);
+        SDL_Renderer* renderer = Common::GetRenderer();
+
+        SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
+        SDL_RenderFillRect(renderer, &mPositionDimension);
 
         for(const ObjectPtr& child : mChildren)
         {
@@ -224,23 +223,18 @@ namespace UI
         }
     }
 
-    Image::~Image() { SDL_DestroyTexture(mTexture); }
-
-    void Image::SetImagePath(const std::string& imagePath)
+    void Image::SetImagePath(const std::string& texturePath)
     {
-        mImagePath              = imagePath;
-        SDL_Surface* surface    = SDL_LoadSurface(imagePath.c_str());
-        SDL_Texture* newTexture = SDL_CreateTextureFromSurface(sRenderer, surface);
-
-        SDL_DestroySurface(surface);
-        SDL_DestroyTexture(mTexture);
-
-        mTexture = newTexture;
+        if(mTexturePath != texturePath)
+        {
+            mTexturePath = texturePath;
+            mTexture     = Common::LoadTexture(mTexturePath);
+        }
     }
 
     void Image::Draw() const
     {
-        SDL_RenderTexture(sRenderer, mTexture, nullptr, &mPositionDimension);
+        SDL_RenderTexture(Common::GetRenderer(), mTexture.get(), nullptr, &mPositionDimension);
         superclass::Draw();
     }
 
@@ -249,7 +243,7 @@ namespace UI
         superclass::DrawImguiObjectDetailsDebugMenu();
         ImGui::Text("Image Path");
         ImGui::Indent();
-        ImGui::Text(mImagePath.c_str());
+        ImGui::Text(mTexturePath.c_str());
         ImGui::Unindent();
     }
 
@@ -259,6 +253,32 @@ namespace UI
         return root;
     }
 
-    void Text::Draw() const {}
+    void Text::SetFontPath(const std::string& fontPath)
+    {
+        if(mFontPath != fontPath)
+        {
+            mFontPath = fontPath;
+            mFont     = Common::GetFont(mFontPath);
+        }
+    }
+
+    void Text::SetText(const std::string& text)
+    {
+        if(mText != text)
+        {
+            mText = text;
+            if(mFont)
+            {
+                mTexture.release();
+                mTexture = Common::LoadTextTexture(*mFont, mColor, mText);
+            }
+            else
+            {
+                Logging::LogWarning("Attempted to initialize text but font hasn't been initialized.");
+            }
+        }
+    }
+
+    void Text::Draw() const { SDL_RenderTexture(Common::GetRenderer(), mTexture.get(), nullptr, &mPositionDimension); }
 
 } // namespace UI
