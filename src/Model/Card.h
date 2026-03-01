@@ -1,4 +1,5 @@
 #pragma once
+#include "Tools/TGUID.h"
 
 enum class CardColour;
 
@@ -8,4 +9,5 @@ struct Card
 
     int mPower;
     CardColour mColour;
+    TGUID<Card> mGuid{TGUID<Card>::Generate()};
 };
