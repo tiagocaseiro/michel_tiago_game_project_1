@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 project(michel-tiago-game-project-1 LANGUAGES CXX)
 
 find_package(SDL3 REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,7 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB SOURCE_FILES_PATH 
         src/Tools/*.cpp
         src/Model/*.cpp 
-	src/Rules/*.cpp 
+	    src/Rules/*.cpp
+		src/Actions/*.cpp
         src/UI/*.cpp 
         src/*.cpp
         dependencies/imgui/*.cpp 
@@ -18,7 +20,9 @@ file(GLOB SOURCE_FILES_PATH
         dependencies/imgui/backends/imgui_impl_sdlrenderer3.cpp
 )
 
-add_executable(michel-tiago-game-project-1 ${SOURCE_FILES_PATH}) 
+add_executable(michel-tiago-game-project-1 ${SOURCE_FILES_PATH}
+		src/Tools/TGUID.h
+		src/Model/CardZone.cpp)
 
 target_include_directories(michel-tiago-game-project-1 PUBLIC 
         dependencies/imgui
@@ -29,6 +33,7 @@ target_include_directories(michel-tiago-game-project-1 PUBLIC
 set_target_properties(michel-tiago-game-project-1 PROPERTIES LINKER_LANGUAGE CXX)
 
 target_link_libraries(michel-tiago-game-project-1 PRIVATE SDL3::SDL3)
+target_link_libraries(michel-tiago-game-project-1 PRIVATE nlohmann_json::nlohmann_json)
 
 add_custom_command(
         TARGET michel-tiago-game-project-1 POST_BUILD
