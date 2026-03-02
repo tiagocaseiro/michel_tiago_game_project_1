@@ -20,6 +20,8 @@ file(GLOB SOURCE_FILES_PATH
         dependencies/imgui/backends/imgui_impl_sdlrenderer3.cpp
 )
 
+add_executable(michel-tiago-game-project-1 ${SOURCE_FILES_PATH})
+
 target_include_directories(michel-tiago-game-project-1 PUBLIC 
         dependencies/imgui
         dependencies/imgui/backends

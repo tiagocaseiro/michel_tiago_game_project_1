@@ -10,9 +10,9 @@ enum class CardColour
     Brown
 };
 
-namespace NCardColour
+namespace EnumUtil
 {
-    std::string ToString(CardColour colour)
+    constexpr std::string ToString(CardColour colour)
     {
         switch(colour)
         {

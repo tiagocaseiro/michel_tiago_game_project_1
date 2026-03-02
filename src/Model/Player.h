@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CardZone.h"
+#include "Rules/CardZoneRules.h"
 #include "Tools/TGUID.h"
 
 #include <nlohmann/json_fwd.hpp>

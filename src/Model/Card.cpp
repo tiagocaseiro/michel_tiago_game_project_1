@@ -7,7 +7,7 @@
 nlohmann::json Card::ToJson() const
 {
     nlohmann::json j;
-    j["Colour"] = NCardColour::ToString(mColour);
+    j["Colour"] = EnumUtil::ToString(mColour);
     j["Power"] = mPower;
 
     return j;
