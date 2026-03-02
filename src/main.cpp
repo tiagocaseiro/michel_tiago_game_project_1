@@ -11,10 +11,7 @@
 #include "Tools/ImguiDebug.h"
 #include "Tools/Logging.h"
 
-#include "Model/Card.h"
-#include "Model/CardColour.h"
-#include "Model/CardType.h"
-#include "Model/CardZone.h"
+#include "Model/GameManager.h"
 
 #include "UI/UIObject.h"
 
@@ -57,6 +54,9 @@ int main(int, char**)
 
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_ShowWindow(window);
+
+    // Setup game
+    GameManager game;
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -161,6 +161,14 @@ int main(int, char**)
         ImGui::NewFrame();
 
         ImguiDebug::DrawMenus();
+
+        static char buf1[128] = "saveFileName";
+        static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AlwaysOverwrite;
+        ImGui::InputText("Save file name:", buf1, IM_COUNTOF(buf1), flags);
+        if (ImGui::Button("Save"))
+        {
+            game.Save(buf1);
+        }
 
         // Rendering
         ImGui::Render();

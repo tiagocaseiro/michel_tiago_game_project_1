@@ -34,7 +34,7 @@ void ActionManager::Scrub(const int numActions)
     int targetAppliedIndex  = mAppliedActionIndex + numActions;
     if(targetAppliedIndex < 0 || targetAppliedIndex >= totalActions)
     {
-        Logging::FLogDebug("Model is on index {} out of {} actions total. Trying to scrub {} actions, which would put us at {}, "
+        Logging::LogDebug("Model is on index {} out of {} actions total. Trying to scrub {} actions, which would put us at {}, "
                   "which is not possible",
                   mAppliedActionIndex, totalActions, numActions, targetAppliedIndex);
     }
@@ -113,7 +113,7 @@ void ActionManager::ReadActionsFromJson(const nlohmann::json& j)
         }
         else
         {
-            Logging::FLogWarning("Failed to create action of type: {}", actionType);
+            Logging::LogWarning("Failed to create action of type: {}", actionType);
         }
     }
     const int appliedActionIndex = j["AppliedActionIndex"].get<int>();

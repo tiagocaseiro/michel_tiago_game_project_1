@@ -5,6 +5,7 @@
 #include "Model/Board.h"
 
 #include "Tools/Logging.h"
+#include "Tools/Types.h"
 
 #include <functional>
 #include <memory>
@@ -36,7 +37,7 @@
 			{
 				return it->second(board, json);
 			}
-			Logging::FLogError("Unknown action type: {}", type);
+			Logging::LogError("Unknown action type: {}", type);
 			return nullptr;
 		}
 
@@ -53,7 +54,7 @@
 			sRegistrar;
 		}
 
-	    std::string GetTypeName() override { return Logging::get_type_name<DerivedAction>(); }
+	    std::string GetTypeName() override { return TypeUtils::get_type_name<DerivedAction>(); }
 
 	private:
 		struct Registrar
@@ -61,7 +62,7 @@
 			Registrar()
 			{
 				static_assert(IsAction<DerivedAction>);
-				ActionFactoryRegistry::Instance().Register(Logging::get_type_name<DerivedAction>(), &DerivedAction::FromJson);
+				ActionFactoryRegistry::Instance().Register(TypeUtils::get_type_name<DerivedAction>(), &DerivedAction::FromJson);
 			}
 		};
 		static Registrar sRegistrar;

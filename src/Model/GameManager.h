@@ -9,11 +9,15 @@
 #include "Rules/InitialSetup.h"
 #include "Actions/ActionManager.h"
 
+#include <string>
+
 class GameManager
 {
 public:
     GameManager(const FormationRules& formationRules = {}, const GameplayRules& gameplayRules = {},
                 const InitialSetup& initialSetup = {});
+
+    void Save(const std::string& saveName = "autosave") const;
 
 private:
     void StartGame(const InitialSetup& initialSetup);

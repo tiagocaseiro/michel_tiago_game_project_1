@@ -39,7 +39,7 @@
 	    const auto blockers = GetBlockers();
 	    if (!blockers.empty())
 	    {
-	        Logging::FLogError("Cannot apply DrawCardsAction: {}", blockers);
+	        Logging::LogError("Cannot apply DrawCardsAction: {}", blockers);
 	        return;
 	    }
 

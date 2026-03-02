@@ -2,6 +2,9 @@
 
 #include "Actions/DrawCardsAction.h"
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+
 GameManager::GameManager(const FormationRules& formationRules, const GameplayRules& gameplayRules,
                          const InitialSetup& initialSetup)
     : mBoard(mPlayer1, mPlayer2, initialSetup),
@@ -10,6 +13,13 @@ GameManager::GameManager(const FormationRules& formationRules, const GameplayRul
       mGameplayRules(gameplayRules)
 {
     StartGame(initialSetup);
+}
+void GameManager::Save(const std::string& saveName) const
+{
+    nlohmann::json saveData = mBoard.ToJson();
+
+    std::ofstream saveFile(saveName + ".json");
+    saveFile << std::setw(4) << saveData << std::endl;
 }
 
 void GameManager::StartGame(const InitialSetup& initialSetup)
