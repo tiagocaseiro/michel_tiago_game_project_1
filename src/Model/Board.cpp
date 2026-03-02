@@ -2,6 +2,10 @@
 #include "Rules/InitialSetup.h"
 #include "Board.h"
 
+#include "Player.h"
+
+#include <nlohmann/json.hpp>
+
 Board::Board(Player& p1, Player& p2, const InitialSetup& setup)
 : mPlayer1(p1)
 , mPlayer2(p2)
@@ -9,6 +13,15 @@ Board::Board(Player& p1, Player& p2, const InitialSetup& setup)
 {
     ConstructTroopsDeck(setup);
     ConstructTacticsDeck(setup);
+}
+nlohmann::json Board::ToJson() const
+{
+    nlohmann::json j;
+
+    j["Player1"] = mPlayer1.ToJson();
+    j["Player2"] = mPlayer2.ToJson();
+
+    return j;
 }
 
 void Board::ConstructTroopsDeck(const InitialSetup& setup) 
