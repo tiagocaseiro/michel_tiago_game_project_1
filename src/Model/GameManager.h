@@ -7,6 +7,7 @@
 #include "Rules/FormationRules.h"
 #include "Rules/GameplayRules.h"
 #include "Rules/InitialSetup.h"
+#include "Actions/ActionManager.h"
 
 class GameManager
 {
@@ -15,13 +16,15 @@ public:
                 const InitialSetup& initialSetup = {});
 
 private:
-    void StartGame();
+    void StartGame(const InitialSetup& initialSetup);
+    void DistributeInitialCards(const InitialSetup& initialSetup, Player& player);
 
     Player mPlayer1;
     Player mPlayer2;
     Board mBoard;
+    ActionManager mActionManager;
+
     // #TODO: We could have the option to data-drive these
     FormationRules mFormationRules;
     GameplayRules mGameplayRules;
-    InitialSetup mInitialSetup;
 };

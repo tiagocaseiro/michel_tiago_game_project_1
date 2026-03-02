@@ -28,8 +28,7 @@ public:
 class DrawCardsAction : public AutoRegisterAction<DrawCardsAction>
 {
 public:
-    DrawCardsAction(Board& battle, std::unique_ptr<DrawCardsActionParams> params);
-    DrawCardsAction(const DrawCardsAction& other) = default;
+    DrawCardsAction(Board& board, std::unique_ptr<DrawCardsActionParams> params);
 
     std::string GetBlockers() const  override;
     void Apply() override;
