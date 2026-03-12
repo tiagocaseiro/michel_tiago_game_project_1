@@ -11,7 +11,7 @@
 #define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
 public:                                                                                                                \
     using superclass = UIClassNameParent;                                                                              \
-    UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                                  \
+    explicit UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                         \
     static auto Make(const std::string& id) { return std::unique_ptr<UIClassName##>(new UIClassName##(id)); }
 
 #define DECLARE_UI_ELEMENT(UIClassName) DECLARE_UI_ELEMENT_DERIVED(##UIClassName, Object)
@@ -54,7 +54,7 @@ namespace UI
 
         virtual void Update();
 
-        virtual void DrawImguiObjectTreeDebugMenu();
+        virtual void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
         virtual void DrawImguiObjectDetailsDebugMenu();
 
         friend void DrawDebug();
@@ -63,9 +63,12 @@ namespace UI
         void AddChild(ObjectPtr object);
         void RemoveChild(std::string_view childId);
         void RemoveChild(int childIndex);
+        void RemoveAllChildren();
+
+        Object* FindObjectByPath(std::string_view path);
 
     protected:
-        Object(const std::string& id) : mId(id), mPath(id) {}
+        explicit Object(const std::string& id) : mId(id) {}
 
         void DrawChildren() const;
 
@@ -79,25 +82,6 @@ namespace UI
 
         std::string mPath;
         std::vector<ObjectPtr> mChildren;
-    };
-
-    class RootObject final : private Object
-    {
-        DECLARE_UI_ELEMENT(RootObject);
-
-    public:
-        using Object::AddChild;
-
-    private:
-        void DrawImguiObjectTreeDebugMenu() override;
-
-        void Draw() const override;
-        void Update() override;
-
-        friend RootObject& Root();
-        friend void Draw();
-        friend void Update();
-        friend void ImguiDebug::DrawMenus();
     };
 
     class Material : public Object
@@ -143,6 +127,9 @@ namespace UI
         std::string mText;
     };
 
-    RootObject& Root();
+    void RemoveAllObjects();
+    void AddObject(ObjectPtr&& object);
+    void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
 
+    Object* FindObjectByPath(std::string_view path);
 } // namespace UI

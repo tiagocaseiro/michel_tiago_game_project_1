@@ -3,10 +3,10 @@
 #include "imgui.h"
 
 #include "Logging.h"
-#include "UI/UIObject.h"
+#include "UI/Core/UIObject.h"
 
 static bool show_log_window = false;
-static bool show_ui_window  = false;
+static bool show_ui_window  = true;
 
 namespace ImguiDebug
 {
@@ -47,7 +47,9 @@ namespace ImguiDebug
 
         if(show_ui_window)
         {
-            UI::Root().DrawImguiObjectTreeDebugMenu();
+            ImGui::Begin("UI Object Tree", &show_ui_window);
+            UI::DrawImguiObjectTreeDebugMenu(true);
+            ImGui::End();
         }
     }
 

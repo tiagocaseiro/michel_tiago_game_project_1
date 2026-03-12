@@ -10,12 +10,34 @@ struct SDL_Renderer;
 
 namespace UI
 {
+    static constexpr auto sPathSeparator = '.';
+
     static Object* sSelectedObjectDetails = nullptr;
     static bool sDetailsWindowOpen        = false;
 
-    void Update() { Root().Update(); }
+    std::vector<ObjectPtr> sObjects;
 
-    void Draw() { Root().Draw(); }
+    void Update()
+    {
+        for(ObjectPtr& object : sObjects)
+        {
+            if(object)
+            {
+                object->Update();
+            }
+        }
+    }
+
+    void Draw()
+    {
+        for(ObjectPtr& object : sObjects)
+        {
+            if(object)
+            {
+                object->Draw();
+            }
+        }
+    }
 
     void DrawDebug()
     {
@@ -154,6 +176,39 @@ namespace UI
         mChildren.erase(it);
     }
 
+    void Object::RemoveAllChildren() { mChildren.clear(); }
+
+    Object* Object::FindObjectByPath(std::string_view path)
+    {
+        if(path == mId)
+        {
+            return this;
+        }
+        // This can be more efficient by storing a path object
+        // It's hella heavy to do all this string manipulation every time we search a path
+        // Also we don't want to depend on '.'
+        const auto frontSeparatorIndex = path.find_first_of(sPathSeparator);
+        const auto frontId             = path.substr(0, frontSeparatorIndex);
+
+        if(frontId == mId)
+        {
+            const auto rest = path.substr(frontSeparatorIndex + 1);
+
+            for(const ObjectPtr& object : mChildren)
+            {
+                if(object)
+                {
+                    if(Object* foundObject = object->FindObjectByPath(rest))
+                    {
+                        return foundObject;
+                    }
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
     void Object::DrawChildren() const
     {
         for(const ObjectPtr& child : mChildren)
@@ -187,14 +242,28 @@ namespace UI
 
     void Object::Update()
     {
-        if(mParent == nullptr)
+        const auto rootObjectIt = std::ranges::find_if(sObjects, [this](const ObjectPtr& object) {
+            return object.get() == this;
+        });
+
+        const bool isRootObject = (rootObjectIt != std::end(sObjects));
+
+        if(mParent == nullptr && isRootObject == false)
         {
             return;
         }
 
-        // Defaulting to LEFT alignment
-        mPositionDimension.x = mParent->mPositionDimension.x + mMargin.left;
-        mPositionDimension.y = mParent->mPositionDimension.y + mMargin.top;
+        if(isRootObject)
+        {
+            mPositionDimension.x = mMargin.left;
+            mPositionDimension.y = mMargin.top;
+        }
+        else
+        {
+            // Defaulting to LEFT alignment
+            mPositionDimension.x = mParent->mPositionDimension.x + mMargin.left;
+            mPositionDimension.y = mParent->mPositionDimension.y + mMargin.top;
+        }
 
         for(const ObjectPtr& child : mChildren)
         {
@@ -202,12 +271,21 @@ namespace UI
         }
     }
 
-    void Object::DrawImguiObjectTreeDebugMenu()
+    void Object::DrawImguiObjectTreeDebugMenu(const bool forceExpand)
     {
         ImGui::PushID(mId.c_str());
 
-        const bool isOpen =
-            ImGui::TreeNodeEx(mId.c_str(), mChildren.empty() ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
+        auto treeNodeFlags = ImGuiTreeNodeFlags_None;
+        if(mChildren.empty())
+        {
+            treeNodeFlags = ImGuiTreeNodeFlags_Leaf;
+        }
+        else if(forceExpand)
+        {
+            treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
+        }
+
+        const bool isOpen = ImGui::TreeNodeEx(mId.c_str(), treeNodeFlags);
         ImGui::SameLine();
         if(ImGui::SmallButton("Details"))
         {
@@ -233,61 +311,11 @@ namespace UI
         {
             for(const ObjectPtr& child : mChildren)
             {
-                child->DrawImguiObjectTreeDebugMenu();
+                child->DrawImguiObjectTreeDebugMenu(forceExpand);
             }
             ImGui::TreePop();
         }
         ImGui::PopID();
-    }
-
-    void RootObject::Draw() const
-    {
-        for(const ObjectPtr& child : mChildren)
-        {
-            if(child)
-            {
-                child->Draw();
-            }
-        }
-    }
-    void RootObject::Update()
-    {
-        for(const ObjectPtr& child : mChildren)
-        {
-            if(child)
-            {
-                child->Update();
-            }
-        }
-    }
-
-    void RootObject::DrawImguiObjectTreeDebugMenu()
-    {
-        if(ImGui::TreeNode(mId.c_str()))
-        {
-            for(const ObjectPtr& child : mChildren)
-            {
-                if(child)
-                {
-                    child->DrawImguiObjectTreeDebugMenu();
-                }
-            }
-            ImGui::TreePop();
-        }
-
-        if(sDetailsWindowOpen)
-        {
-            if(sSelectedObjectDetails != nullptr)
-            {
-                ImGui::Begin("UI Object Details", &sDetailsWindowOpen);
-                sSelectedObjectDetails->DrawImguiObjectDetailsDebugMenu();
-                ImGui::End();
-            }
-        }
-        else
-        {
-            sSelectedObjectDetails = nullptr;
-        }
     }
 
     void Material::SetImagePath(const std::string& texturePath)
@@ -301,21 +329,19 @@ namespace UI
 
     void Material::Draw() const
     {
-        if(mVisibility && mParent->GetVisibility())
+        if(mVisibility)
         {
             SDL_Renderer* renderer = Common::GetRenderer();
             SDL_RenderTexture(renderer, mTexture.get(), nullptr, &mPositionDimension);
             SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
             SDL_RenderFillRect(renderer, &mPositionDimension);
+            DrawChildren();
         }
-
-        DrawChildren();
     }
 
     void Material::DrawImguiObjectDetailsDebugMenu()
     {
         superclass::DrawImguiObjectDetailsDebugMenu();
-
         if(ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImGui::Text("Image Path");
@@ -327,12 +353,6 @@ namespace UI
             ImGui::SameLine();
             ImGui::ColorEdit4("Color", (float*)&mColor);
         }
-    }
-
-    RootObject& Root()
-    {
-        static RootObject root = RootObject("root");
-        return root;
     }
 
     void Text::SetFontPath(const std::string& fontPath)
@@ -402,6 +422,51 @@ namespace UI
             ImGui::Text(mFontPath.c_str());
             ImGui::Unindent();
         }
+    }
+
+    void RemoveAllObjects() { sObjects.clear(); }
+
+    void AddObject(ObjectPtr&& object) { sObjects.emplace_back(std::move(object)); }
+
+    void DrawImguiObjectTreeDebugMenu(const bool forceExpand)
+    {
+        for(const ObjectPtr& child : sObjects)
+        {
+            if(child)
+            {
+                child->DrawImguiObjectTreeDebugMenu(forceExpand);
+            }
+        }
+
+        if(sDetailsWindowOpen)
+        {
+            if(sSelectedObjectDetails != nullptr)
+            {
+                ImGui::Begin("UI Object Details", &sDetailsWindowOpen);
+                sSelectedObjectDetails->DrawImguiObjectDetailsDebugMenu();
+                ImGui::End();
+            }
+        }
+        else
+        {
+            sSelectedObjectDetails = nullptr;
+        }
+    }
+
+    Object* FindObjectByPath(std::string_view path)
+    {
+        for(const ObjectPtr& object : sObjects)
+        {
+            if(object)
+            {
+                if(Object* foundObject = object->FindObjectByPath(path))
+                {
+                    return foundObject;
+                }
+            }
+        }
+
+        return nullptr;
     }
 
 } // namespace UI

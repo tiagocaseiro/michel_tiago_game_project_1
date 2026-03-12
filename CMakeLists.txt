@@ -12,10 +12,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB SOURCE_FILES_PATH 
         src/*.cpp
         src/Common/*.cpp 
+        src/Input/*.cpp
+        src/GameUI/*.cpp
         src/Model/*.cpp 
-	    src/Rules/*.cpp
-		src/Actions/*.cpp
-        src/UI/*.cpp 
+	src/Rules/*.cpp
+	src/Actions/*.cpp
+        src/UI/Core/*.cpp 
+        src/UI/Game/*.cpp 
         src/Tools/*.cpp
         dependencies/imgui/*.cpp 
         dependencies/imgui/backends/imgui_impl_sdl3.cpp 
