@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Common/Color.h"
+#include "Common/Text.h"
 #include "Common/Texture.h"
 
 #include "Tools/ImguiDebug.h"
@@ -68,7 +69,7 @@ namespace UI
         Object* FindObjectByPath(std::string_view path);
 
     protected:
-        explicit Object(const std::string& id) : mId(id) {}
+        explicit Object(const std::string& id) : mId(id), mPath(id) {}
 
         void DrawChildren() const;
 
@@ -97,8 +98,8 @@ namespace UI
 
         virtual void DrawImguiObjectDetailsDebugMenu() override;
 
-        TextureUniquePtr mTexture = Common::EmptyTexture();
-        Color mColor              = Common::Color::TRANSPARENT;
+        SDLTextureUniquePtr mTextureHandle = Common::EmptyTexture();
+        Color mColor                       = Common::Color::TRANSPARENT;
         std::string mTexturePath;
     };
 
@@ -110,18 +111,24 @@ namespace UI
         void SetFontPath(const std::string& fontPath);
         void SetText(const std::string& text);
         void SetColor(Color color);
+        void SetSize(int size);
+
+    protected:
+        void Update() override;
 
     private:
-        void UpdateTexture();
+        using Object::SetHeight;
+        using Object::SetWidth;
+
+        void UpdateText();
 
         virtual void Draw() const override;
         virtual void DrawImguiObjectDetailsDebugMenu() override;
 
-        TTF_Font* mFont = nullptr;
-
-        TextureUniquePtr mTexture = Common::EmptyTexture();
-
         Color mColor = Common::Color::BLACK;
+        int mSize    = 0;
+
+        SDLTextUniquePtr mTextHandle = Common::EmptyText();
 
         std::string mFontPath;
         std::string mText;

@@ -14,11 +14,10 @@ void GameUI::InitializeStartUpUI()
 
     auto text = UI::Text::Make("text");
     text->SetFontPath("fonts/unispace.ttf");
-    text->SetWidth(300);
-    text->SetHeight(30);
     text->SetColor({0, 0, 0, 1});
     text->SetMargin({100, 50, 0, 0});
-    text->SetText("Pray for Israel <3");
+    text->SetText("Test text");
+    text->SetSize(30);
 
     auto panel1 = UI::Material::Make("panel1");
     panel1->SetWidth(100);
@@ -66,6 +65,8 @@ void GameUI::OnMouseLeftButtonUp(const float mouseX, const float mouseY)
 {
     if(UI::Object* object = UI::FindObjectByPath("image.panel1.panel11"))
     {
-        UI::RemoveAllObjects();
+        // UI::RemoveAllObjects();
     }
 }
+
+void GameUI::Shutdown() { UI::RemoveAllObjects(); }

@@ -11,7 +11,7 @@ namespace Common
 {
     using SurfaceUniquePtr = std::unique_ptr<SDL_Surface, decltype(&SDL_DestroySurface)>;
 
-    TextureUniquePtr LoadTexture(const std::string& imagePath)
+    SDLTextureUniquePtr LoadTexture(const std::string& imagePath)
     {
         SDL_Renderer* renderer = Common::GetRenderer();
 
@@ -29,8 +29,8 @@ namespace Common
             return EmptyTexture();
         }
 
-        TextureUniquePtr texture =
-            TextureUniquePtr(SDL_CreateTextureFromSurface(renderer, surface.get()), &SDL_DestroyTexture);
+        SDLTextureUniquePtr texture =
+            SDLTextureUniquePtr(SDL_CreateTextureFromSurface(renderer, surface.get()), &SDL_DestroyTexture);
 
         if(texture == nullptr)
         {
@@ -40,7 +40,7 @@ namespace Common
         return texture;
     }
 
-    TextureUniquePtr LoadTextTexture(TTF_Font& font, SDL_FColor color, const std::string& text)
+    SDLTextureUniquePtr LoadTextTexture(TTF_Font& font, SDL_FColor color, const std::string& text)
     {
         SDL_Renderer* renderer = Common::GetRenderer();
 
@@ -66,8 +66,8 @@ namespace Common
             return EmptyTexture();
         }
 
-        TextureUniquePtr texture =
-            TextureUniquePtr(SDL_CreateTextureFromSurface(renderer, surface.get()), &SDL_DestroyTexture);
+        SDLTextureUniquePtr texture =
+            SDLTextureUniquePtr(SDL_CreateTextureFromSurface(renderer, surface.get()), &SDL_DestroyTexture);
 
         if(texture == nullptr)
         {
@@ -77,5 +77,5 @@ namespace Common
         return texture;
     }
 
-    TextureUniquePtr EmptyTexture() { return TextureUniquePtr(nullptr, &SDL_DestroyTexture); }
+    SDLTextureUniquePtr EmptyTexture() { return SDLTextureUniquePtr(nullptr, &SDL_DestroyTexture); }
 } // namespace Common

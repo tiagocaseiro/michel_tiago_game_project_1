@@ -6,7 +6,7 @@
 #include "imgui_impl_sdlrenderer3.h"
 
 #include "Common/Data.h"
-#include "Common/Fonts.h"
+#include "Common/Text.h"
 
 #include "UI/Game/GameUI.h"
 
@@ -37,9 +37,12 @@ int main(int, char**)
     }
     SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
 
+    TTF_TextEngine* textRenderer = TTF_CreateRendererTextEngine(renderer);
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     Common::SetRenderer(renderer);
+    Common::SetTextRenderer(textRenderer);
 
     SDL_SetRenderVSync(renderer, 1);
     if(renderer == nullptr)
@@ -83,8 +86,6 @@ int main(int, char**)
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    Common::LoadFont("fonts/unispace.ttf", 200);
 
     GameUI::Instance().InitializeStartUpUI();
     // Main loop
@@ -142,8 +143,11 @@ int main(int, char**)
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
 
+    GameUI::Instance().Shutdown();
+
     Common::UnloadAllFonts();
 
+    TTF_DestroyRendererTextEngine(textRenderer);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_Quit();

@@ -13,4 +13,6 @@ public:
     void InitializeStartUpUI();
 
     void OnMouseLeftButtonUp(const float mouseX, const float mouseY) override;
+
+    void Shutdown();
 };

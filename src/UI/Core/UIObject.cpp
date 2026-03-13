@@ -1,9 +1,11 @@
 #include "UIObject.h"
 
+#include <SDL3_ttf/SDL_ttf.h>
+
 #include "imgui.h"
 
 #include "Common/Data.h"
-#include "Common/Fonts.h"
+#include "Common/Text.h"
 #include "Tools/Logging.h"
 
 struct SDL_Renderer;
@@ -225,7 +227,6 @@ namespace UI
 
     void Object::UpdatePath()
     {
-        mPath = mId;
         if(mParent)
         {
             mPath = mParent->mPath + "." + mPath;
@@ -322,8 +323,8 @@ namespace UI
     {
         if(mTexturePath != texturePath)
         {
-            mTexturePath = texturePath;
-            mTexture     = Common::LoadTexture(mTexturePath);
+            mTexturePath   = texturePath;
+            mTextureHandle = Common::LoadTexture(mTexturePath);
         }
     }
 
@@ -332,7 +333,7 @@ namespace UI
         if(mVisibility)
         {
             SDL_Renderer* renderer = Common::GetRenderer();
-            SDL_RenderTexture(renderer, mTexture.get(), nullptr, &mPositionDimension);
+            SDL_RenderTexture(renderer, mTextureHandle.get(), nullptr, &mPositionDimension);
             SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
             SDL_RenderFillRect(renderer, &mPositionDimension);
             DrawChildren();
@@ -360,37 +361,51 @@ namespace UI
         if(mFontPath != fontPath)
         {
             mFontPath = fontPath;
-            mFont     = Common::TryGetFont(mFontPath);
+            UpdateText();
         }
     }
 
     void Text::SetText(const std::string& text)
     {
         mText = text;
-        UpdateTexture();
+        UpdateText();
     }
 
     void Text::SetColor(Color color)
     {
         mColor = color;
-        UpdateTexture();
+        UpdateText();
     }
 
-    void Text::UpdateTexture()
+    void Text::SetSize(int size)
     {
-        if(mFont == nullptr)
+        mSize = size;
+        UpdateText();
+    }
+
+    void Text::Update()
+    {
+        superclass::Update();
+
+        int w = 0;
+        int h = 0;
+        TTF_GetTextSize(mTextHandle.get(), &w, &h);
+
+        SetWidth(w);
+        SetHeight(h);
+    }
+
+    void Text::UpdateText()
+    {
+        if(mSize == 0)
         {
-            Logging::LogWarning("Attempted to initialize text but font hasn't been initialized.");
             return;
         }
-
-        if(mText.empty() == false)
-        {
-            mTexture = Common::LoadTextTexture(*mFont, mColor, mText);
-        }
+        mTextHandle = Common::CreateText(mFontPath, mSize, mText);
+        TTF_SetTextColorFloat(mTextHandle.get(), mColor.r, mColor.g, mColor.b, mColor.a);
     }
 
-    void Text::Draw() const { SDL_RenderTexture(Common::GetRenderer(), mTexture.get(), nullptr, &mPositionDimension); }
+    void Text::Draw() const { TTF_DrawRendererText(mTextHandle.get(), mPositionDimension.x, mPositionDimension.y); }
 
     void Text::DrawImguiObjectDetailsDebugMenu()
     {
@@ -414,12 +429,25 @@ namespace UI
             ImGui::SameLine();
             if(ImGui::ColorEdit4("Color", (float*)&mColor))
             {
-                UpdateTexture();
+                UpdateText();
             }
 
             ImGui::Text("Font");
             ImGui::Indent();
             ImGui::Text(mFontPath.c_str());
+            ImGui::Unindent();
+
+            ImGui::Text("Size");
+            ImGui::Indent();
+
+            static int textSize = 0;
+
+            textSize = mSize;
+
+            if(ImGui::InputInt("##TextSize", &textSize, 1, 10))
+            {
+                SetSize(textSize);
+            }
             ImGui::Unindent();
         }
     }
