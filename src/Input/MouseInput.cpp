@@ -12,20 +12,7 @@ namespace MouseInput
     static float sMouseX = 0;
     static float sMouseY = 0;
 
-    static void OnMouseMotion() { SDL_GetMouseState(&sMouseX, &sMouseY); }
-
-    static void OnMouseButtonDown()
-    {
-        for(EventListener* const eventListener : sEventListeners)
-        {
-            if(eventListener)
-            {
-                eventListener->OnMouseLeftButtonDown(sMouseX, sMouseY);
-            }
-        }
-    }
-
-    static void OnMouseButtonUp()
+    void NotifyMouseLeftButtonUp()
     {
         for(EventListener* const eventListener : sEventListeners)
         {
@@ -36,18 +23,59 @@ namespace MouseInput
         }
     }
 
+    void NotifyMouseLeftButtonDown()
+    {
+        for(EventListener* const eventListener : sEventListeners)
+        {
+            if(eventListener)
+            {
+                eventListener->OnMouseLeftButtonDown(sMouseX, sMouseY);
+            }
+        }
+    }
+
+    static void OnMouseMotion(const SDL_MouseMotionEvent event)
+    {
+        sMouseX = event.x;
+        sMouseY = event.y;
+    }
+
+    static void OnMouseButtonDown(const SDL_MouseButtonEvent& event)
+    {
+        switch(event.button)
+        {
+            case SDL_BUTTON_LEFT:
+                NotifyMouseLeftButtonDown();
+                break;
+            default:
+                break;
+        }
+    }
+
+    static void OnMouseButtonUp(const SDL_MouseButtonEvent& event)
+    {
+        switch(event.button)
+        {
+            case SDL_BUTTON_LEFT:
+                NotifyMouseLeftButtonUp();
+                break;
+            default:
+                break;
+        }
+    }
+
     void HandleEvent(const SDL_Event& event)
     {
         switch(event.type)
         {
             case SDL_EVENT_MOUSE_MOTION:
-                OnMouseMotion();
+                OnMouseMotion(event.motion);
                 break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                OnMouseButtonDown();
+                OnMouseButtonDown(event.button);
                 break;
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                OnMouseButtonUp();
+                OnMouseButtonUp(event.button);
                 break;
         }
     }
