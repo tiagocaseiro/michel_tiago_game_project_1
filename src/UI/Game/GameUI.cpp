@@ -1,6 +1,8 @@
 #include "UI/Game/GameUI.h"
 
-#include "UI/Core/UIObject.h"
+#include "GameUI.h"
+#include "UI/Core/UIMaterial.h"
+#include "UI/Core/UIText.h"
 
 GameUI& GameUI::Instance()
 {
@@ -8,64 +10,131 @@ GameUI& GameUI::Instance()
     return gameUI;
 }
 
-void GameUI::InitializeStartUpUI()
+GameUI::GameUI() : mState(State::Invalid) {}
+
+void GameUI::EnterState(State const state)
+{
+    ExitState(mState);
+
+    mState = state;
+
+    switch(mState)
+    {
+        case State::PreBattle:
+            EnterPreBattleState();
+            break;
+        case State::Battle:
+            EnterBattleState();
+            break;
+        case State::PostBattle:
+            EnterPostBattleState();
+            break;
+        default:
+            break;
+    }
+}
+
+void GameUI::ExitState(State const state)
+{
+
+    switch(mState)
+    {
+        case State::PreBattle:
+            ExitPreBattleState();
+            break;
+        case State::Battle:
+            ExitBattleState();
+            break;
+        case State::PostBattle:
+            ExitPostBattleState();
+            break;
+
+        default:
+            break;
+    }
+}
+
+void GameUI::Init() { EnterState(State::PreBattle); }
+
+void GameUI::Update() {}
+void GameUI::EnterPreBattleState()
 {
     UI::RemoveAllObjects();
 
-    auto text = UI::Text::Make("text");
-    text->SetFontPath("fonts/unispace.ttf");
-    text->SetColor({0, 0, 0, 1});
-    text->SetMargin({100, 50, 0, 0});
-    text->SetText("Test text");
-    text->SetSize(30);
+    std::shared_ptr<UI::Text> gameTitle = UI::Text::Make("gameTitle");
+    gameTitle->SetFontPath("fonts/canterbury.ttf");
+    gameTitle->SetColor({0, 0, 0, 1});
+    gameTitle->SetHorizontalAlignment(UI::HorizontalAlignment::Center);
+    gameTitle->SetVerticalAlignment(UI::VerticalAlignment::Top);
+    gameTitle->SetTopMargin(300);
+    gameTitle->SetText("Battle Line");
+    gameTitle->SetSize(150);
 
-    auto panel1 = UI::Material::Make("panel1");
-    panel1->SetWidth(100);
-    panel1->SetHeight(100);
-    panel1->SetMargin({100, 100, 0, 0});
-    panel1->SetColor({0.5, 0.26, 0.75, 1});
+    std::shared_ptr<UI::Material> startButtonParent = UI::Material::Make("startButtonParent");
+    startButtonParent->SetColor({0, 0, 0, 1});
+    startButtonParent->SetTopMargin(500);
+    startButtonParent->SetWidth(200);
+    startButtonParent->SetHeight(60);
+    startButtonParent->SetHorizontalAlignment(UI::HorizontalAlignment::Center);
+    startButtonParent->SetVerticalAlignment(UI::VerticalAlignment::Top);
 
-    auto panel11 = UI::Material::Make("panel11");
-    panel11->SetWidth(25);
-    panel11->SetHeight(25);
-    panel11->SetMargin({10, 10, 0, 0});
-    panel11->SetColor({1, 1, 0.75, 1});
+    std::shared_ptr<UI::Text> startButtonLabel = UI::Text::Make("startButtonLabel");
+    startButtonLabel->SetFontPath("fonts/montserrat.ttf");
+    startButtonLabel->SetColor({1, 1, 1, 1});
+    startButtonLabel->SetHorizontalAlignment(UI::HorizontalAlignment::Center);
+    startButtonLabel->SetVerticalAlignment(UI::VerticalAlignment::Center);
+    startButtonLabel->SetText("Start Game");
+    startButtonLabel->SetSize(30);
 
-    panel1->AddChild(std::move(panel11));
+    startButtonParent->AddChild(startButtonLabel);
 
-    auto panel2 = UI::Material::Make("panel2");
-    panel2->SetWidth(100);
-    panel2->SetHeight(100);
-    panel2->SetMargin({200, 200, 0, 0});
-    panel2->SetColor({1, 0.76, 0, 1});
+    mStartButtonPanel = startButtonParent;
+    mStartButtonLabel = startButtonLabel;
 
-    auto panel3 = UI::Material::Make("panel3");
-    panel3->SetWidth(100);
-    panel3->SetHeight(100);
-    panel3->SetVisibility(false);
-    panel3->SetMargin({300, 300, 0, 0});
-    panel3->SetColor({0.5, 1., 0.2, 0.4});
-
-    auto image = UI::Material::Make("image");
-    image->SetWidth(500);
-    image->SetHeight(500);
-    image->SetMargin({300, 300, 0, 0});
-    image->SetImagePath("textures/crate.png");
-    image->SetColor({1, 0, 0, 0.40});
-
-    image->AddChild(std::move(panel1));
-    image->AddChild(std::move(panel2));
-    image->AddChild(std::move(panel3));
-    image->AddChild(std::move(text));
-
-    UI::AddObject(std::move(image));
+    UI::AddObject(gameTitle);
+    UI::AddObject(startButtonParent);
 }
+
+void GameUI::EnterBattleState() {}
+
+void GameUI::EnterPostBattleState() {}
+
+void GameUI::UpdatePreBattleState() {}
+
+void GameUI::UpdateBattleState() {}
+
+void GameUI::UpdatePostBattleState() {}
+
+void GameUI::ExitPreBattleState() {}
+
+void GameUI::ExitBattleState() {}
+
+void GameUI::ExitPostBattleState() {}
 
 void GameUI::OnMouseLeftButtonUp(const float mouseX, const float mouseY)
 {
-    if(UI::Object* object = UI::FindObjectByPath("image.panel1.panel11"))
+    if(auto startButtonPanel = mStartButtonPanel.lock())
     {
-        // UI::RemoveAllObjects();
+        startButtonPanel->SetColor({0, 0, 0, 1});
+        if(auto startButtonLabel = mStartButtonLabel.lock())
+        {
+            startButtonLabel->SetColor({1, 1, 1, 1});
+        }
+    }
+}
+
+void GameUI::OnMouseLeftButtonDown(const float mouseX, const float mouseY)
+{
+    if(auto startButtonPanel = mStartButtonPanel.lock())
+    {
+        if(startButtonPanel->IsInsideBounds(mouseX, mouseY))
+        {
+            startButtonPanel->SetColor({1, 1, 1, 1});
+            if(auto startButtonLabel = mStartButtonLabel.lock())
+            {
+                startButtonLabel->SetColor({0, 0, 0, 1});
+            }
+        }
     }
 }
 

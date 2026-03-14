@@ -13,13 +13,30 @@
 public:                                                                                                                \
     using superclass = UIClassNameParent;                                                                              \
     explicit UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                         \
-    static auto Make(const std::string& id) { return std::unique_ptr<UIClassName##>(new UIClassName##(id)); }
+    static auto Make(const std::string& id) { return std::shared_ptr<UIClassName##>(new UIClassName##(id)); }
 
 #define DECLARE_UI_ELEMENT(UIClassName) DECLARE_UI_ELEMENT_DERIVED(##UIClassName, Object)
 
 namespace UI
 {
-    using ObjectPtr = std::unique_ptr<class Object>;
+    using ObjectSharedPtr = std::shared_ptr<class Object>;
+    using ObjectWeakPtr   = std::weak_ptr<class Object>;
+
+    enum class HorizontalAlignment
+    {
+        Left,
+        Right,
+        Center,
+        Stretch
+    };
+
+    enum class VerticalAlignment
+    {
+        Top,
+        Bottom,
+        Center,
+        Stretch
+    };
 
     struct Margin
     {
@@ -45,98 +62,79 @@ namespace UI
 
         virtual void Draw() const = 0;
 
-        void SetHeight(float height) { mPositionDimension.h = height; }
-        void SetWidth(float width) { mPositionDimension.w = width; }
-        void SetMargin(Margin margin) { mMargin = margin; }
-        void SetParent(Object& parent);
-        void SetVisibility(bool visibility) { mVisibility = visibility; }
+        void SetHeight(float const height) { mPositionDimension.h = height; }
+        void SetWidth(float const width) { mPositionDimension.w = width; }
+        void SetMargin(Margin const margin) { mMargin = margin; }
+        void SetTopMargin(float const topMargin) { mMargin.top = topMargin; }
+        void SetBottomMargin(float const bottomMargin) { mMargin.bottom = bottomMargin; }
+        void SetLeftMargin(float const leftMargin) { mMargin.left = leftMargin; }
+        void SetRightMargin(float const rightMargin) { mMargin.right = rightMargin; }
+        void SetVisibility(bool const visibility) { mVisible = visibility; }
+        void SetHorizontalAlignment(HorizontalAlignment const hAlignment) { mHorizontalAlignment = hAlignment; }
+        void SetVerticalAlignment(VerticalAlignment const vAlignment) { mVerticalAlignment = vAlignment; }
 
-        bool GetVisibility() const { return mVisibility; }
+        void SetParent(Object& parent);
+
+        bool IsInsideBounds(const float x, const float y);
 
         virtual void Update();
 
         virtual void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
         virtual void DrawImguiObjectDetailsDebugMenu();
 
-        friend void DrawDebug();
-
-        void UpdatePath();
-        void AddChild(ObjectPtr object);
-        void RemoveChild(std::string_view childId);
-        void RemoveChild(int childIndex);
-        void RemoveAllChildren();
+        void AddChild(const ObjectSharedPtr& object);
 
         Object* FindObjectByPath(std::string_view path);
 
     protected:
-        explicit Object(const std::string& id) : mId(id), mPath(id) {}
+        bool GetVisibility() const { return mVisible; }
+
+        void UpdatePath();
+        void RemoveChild(std::string_view childId);
+        void RemoveChild(int childIndex);
+        void RemoveAllChildren();
+
+        void UpdateDimensions();
+        void UpdatePosition();
 
         void DrawChildren() const;
 
+        explicit Object(const std::string& id)
+            : mId(id),
+              mParent(nullptr),
+              mPath(id),
+              mPositionDimension{0.0f, 0.0f, 0.0f, 0.0f},
+              mMargin{0.0f, 0.0f, 0.0f, 0.0f},
+              mHorizontalAlignment{HorizontalAlignment::Left},
+              mVerticalAlignment{VerticalAlignment::Top},
+              mVisible{true}
+        {
+        }
+
         const std::string mId;
 
-        PositionDimension mPositionDimension = {0.0f, 0.0f, 0.0f, 0.0f};
-        Margin mMargin                       = {0.0f, 0.0f, 0.0f, 0.0f};
-        bool mVisibility                     = true;
-
-        const Object* mParent = nullptr;
+        const Object* mParent;
 
         std::string mPath;
-        std::vector<ObjectPtr> mChildren;
-    };
 
-    class Material : public Object
-    {
-        DECLARE_UI_ELEMENT(Material);
+        PositionDimension mPositionDimension;
+        Margin mMargin;
 
-    public:
-        void SetImagePath(const std::string& imagePath);
-        void SetColor(Color color) { mColor = color; }
+        HorizontalAlignment mHorizontalAlignment;
+        VerticalAlignment mVerticalAlignment;
 
-    private:
-        virtual void Draw() const override;
+        std::vector<ObjectSharedPtr> mChildren;
 
-        virtual void DrawImguiObjectDetailsDebugMenu() override;
+        bool mVisible;
 
-        SDLTextureUniquePtr mTextureHandle = Common::EmptyTexture();
-        Color mColor                       = Common::Color::TRANSPARENT;
-        std::string mTexturePath;
-    };
-
-    class Text : public Object
-    {
-        DECLARE_UI_ELEMENT(Text);
-
-    public:
-        void SetFontPath(const std::string& fontPath);
-        void SetText(const std::string& text);
-        void SetColor(Color color);
-        void SetSize(int size);
-
-    protected:
-        void Update() override;
-
-    private:
-        using Object::SetHeight;
-        using Object::SetWidth;
-
-        void UpdateText();
-
-        virtual void Draw() const override;
-        virtual void DrawImguiObjectDetailsDebugMenu() override;
-
-        Color mColor = Common::Color::BLACK;
-        int mSize    = 0;
-
-        SDLTextUniquePtr mTextHandle = Common::EmptyText();
-
-        std::string mFontPath;
-        std::string mText;
+        friend void DrawDebug();
     };
 
     void RemoveAllObjects();
-    void AddObject(ObjectPtr&& object);
+    void AddObject(const ObjectSharedPtr& object);
     void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
+    void SetViewportWidth(float const viewportWidth);
+    void SetViewportHeight(float const viewportHeight);
 
     Object* FindObjectByPath(std::string_view path);
 } // namespace UI

@@ -5,7 +5,6 @@
 #include "imgui.h"
 
 #include "Common/Data.h"
-#include "Common/Text.h"
 #include "Tools/Logging.h"
 
 struct SDL_Renderer;
@@ -17,11 +16,14 @@ namespace UI
     static Object* sSelectedObjectDetails = nullptr;
     static bool sDetailsWindowOpen        = false;
 
-    std::vector<ObjectPtr> sObjects;
+    static float sViewportWidth  = 1.0f;
+    static float sViewportHeight = 1.0f;
+
+    std::vector<ObjectSharedPtr> sObjects;
 
     void Update()
     {
-        for(ObjectPtr& object : sObjects)
+        for(ObjectSharedPtr& object : sObjects)
         {
             if(object)
             {
@@ -32,7 +34,7 @@ namespace UI
 
     void Draw()
     {
-        for(ObjectPtr& object : sObjects)
+        for(ObjectSharedPtr& object : sObjects)
         {
             if(object)
             {
@@ -125,9 +127,9 @@ namespace UI
             ImGui::InputFloat("##DimensionsBottom", &mMargin.bottom, 1.0f, 10.0f);
             ImGui::Unindent();
 
-            ImGui::Text("Visibility");
+            ImGui::Text("Visible");
             ImGui::Indent();
-            ImGui::Checkbox("##Visible", &mVisibility);
+            ImGui::Checkbox("##Visible", &mVisible);
             ImGui::Unindent();
 
             ImGui::Text("Path");
@@ -137,7 +139,7 @@ namespace UI
         }
     }
 
-    void Object::AddChild(ObjectPtr object)
+    void Object::AddChild(const ObjectSharedPtr& object)
     {
         if(object == nullptr)
         {
@@ -145,7 +147,7 @@ namespace UI
             return;
         }
         object->SetParent(*this);
-        mChildren.emplace_back(std::move(object));
+        mChildren.emplace_back(object);
     }
 
     void Object::RemoveChild(std::string_view childId)
@@ -180,6 +182,81 @@ namespace UI
 
     void Object::RemoveAllChildren() { mChildren.clear(); }
 
+    void Object::UpdateDimensions() {}
+
+    void Object::UpdatePosition()
+    {
+        switch(mHorizontalAlignment)
+        {
+            case HorizontalAlignment::Left:
+            {
+                float leftParentOffset = 0;
+                if(mParent != 0)
+                {
+                    leftParentOffset = mParent->mPositionDimension.x;
+                }
+                mPositionDimension.x = leftParentOffset + mMargin.left;
+                break;
+            }
+            case HorizontalAlignment::Right:
+                break;
+            case HorizontalAlignment::Center:
+            {
+                if(mParent != nullptr)
+                {
+                    const float parentWidthCenterX = mParent->mPositionDimension.x + mParent->mPositionDimension.w / 2;
+                    mPositionDimension.x           = parentWidthCenterX - (mPositionDimension.w / 2.f);
+                }
+                else
+                {
+                    const float parentWidthCenterX = sViewportWidth / 2;
+                    mPositionDimension.x           = parentWidthCenterX - (mPositionDimension.w / 2.f);
+                }
+
+                break;
+            }
+            case HorizontalAlignment::Stretch:
+                break;
+            default:
+                break;
+        }
+
+        switch(mVerticalAlignment)
+        {
+            case VerticalAlignment::Top:
+            {
+                float topParentOffset = 0;
+                if(mParent != 0)
+                {
+                    topParentOffset = mParent->mPositionDimension.y;
+                }
+                mPositionDimension.y = topParentOffset + mMargin.top;
+                break;
+            }
+            case VerticalAlignment::Bottom:
+                break;
+            case VerticalAlignment::Center:
+            {
+                if(mParent != nullptr)
+                {
+                    const float parentWidthCenterY = mParent->mPositionDimension.y + mParent->mPositionDimension.h / 2;
+                    mPositionDimension.y           = parentWidthCenterY - (mPositionDimension.h / 2.f);
+                }
+                else
+                {
+                    const float parentWidthCenterY = sViewportHeight / 2;
+                    mPositionDimension.y           = parentWidthCenterY - (mPositionDimension.h / 2.f);
+                }
+
+                break;
+            }
+            case VerticalAlignment::Stretch:
+                break;
+            default:
+                break;
+        }
+    }
+
     Object* Object::FindObjectByPath(std::string_view path)
     {
         if(path == mId)
@@ -196,7 +273,7 @@ namespace UI
         {
             const auto rest = path.substr(frontSeparatorIndex + 1);
 
-            for(const ObjectPtr& object : mChildren)
+            for(const ObjectSharedPtr& object : mChildren)
             {
                 if(object)
                 {
@@ -213,7 +290,7 @@ namespace UI
 
     void Object::DrawChildren() const
     {
-        for(const ObjectPtr& child : mChildren)
+        for(const ObjectSharedPtr& child : mChildren)
         {
             child->Draw();
         }
@@ -223,6 +300,15 @@ namespace UI
     {
         mParent = &parent;
         UpdatePath();
+    }
+
+    bool Object::IsInsideBounds(const float x, const float y)
+    {
+        auto left   = mPositionDimension.x;
+        auto right  = mPositionDimension.x + mPositionDimension.w;
+        auto top    = mPositionDimension.y;
+        auto bottom = mPositionDimension.y + mPositionDimension.h;
+        return left <= x && right >= x && top <= y && bottom >= y;
     }
 
     void Object::UpdatePath()
@@ -243,7 +329,7 @@ namespace UI
 
     void Object::Update()
     {
-        const auto rootObjectIt = std::ranges::find_if(sObjects, [this](const ObjectPtr& object) {
+        const auto rootObjectIt = std::ranges::find_if(sObjects, [this](const ObjectSharedPtr& object) {
             return object.get() == this;
         });
 
@@ -254,19 +340,10 @@ namespace UI
             return;
         }
 
-        if(isRootObject)
-        {
-            mPositionDimension.x = mMargin.left;
-            mPositionDimension.y = mMargin.top;
-        }
-        else
-        {
-            // Defaulting to LEFT alignment
-            mPositionDimension.x = mParent->mPositionDimension.x + mMargin.left;
-            mPositionDimension.y = mParent->mPositionDimension.y + mMargin.top;
-        }
+        UpdateDimensions();
+        UpdatePosition();
 
-        for(const ObjectPtr& child : mChildren)
+        for(const ObjectSharedPtr& child : mChildren)
         {
             child->Update();
         }
@@ -310,7 +387,7 @@ namespace UI
         }
         if(isOpen)
         {
-            for(const ObjectPtr& child : mChildren)
+            for(const ObjectSharedPtr& child : mChildren)
             {
                 child->DrawImguiObjectTreeDebugMenu(forceExpand);
             }
@@ -319,146 +396,13 @@ namespace UI
         ImGui::PopID();
     }
 
-    void Material::SetImagePath(const std::string& texturePath)
-    {
-        if(mTexturePath != texturePath)
-        {
-            mTexturePath   = texturePath;
-            mTextureHandle = Common::LoadTexture(mTexturePath);
-        }
-    }
-
-    void Material::Draw() const
-    {
-        if(mVisibility)
-        {
-            SDL_Renderer* renderer = Common::GetRenderer();
-            SDL_RenderTexture(renderer, mTextureHandle.get(), nullptr, &mPositionDimension);
-            SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
-            SDL_RenderFillRect(renderer, &mPositionDimension);
-            DrawChildren();
-        }
-    }
-
-    void Material::DrawImguiObjectDetailsDebugMenu()
-    {
-        superclass::DrawImguiObjectDetailsDebugMenu();
-        if(ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            ImGui::Text("Image Path");
-            ImGui::Indent();
-            ImGui::Text(mTexturePath.empty() ? "(empty)" : mTexturePath.c_str());
-            ImGui::Unindent();
-
-            ImGui::Text("Color");
-            ImGui::SameLine();
-            ImGui::ColorEdit4("Color", (float*)&mColor);
-        }
-    }
-
-    void Text::SetFontPath(const std::string& fontPath)
-    {
-        if(mFontPath != fontPath)
-        {
-            mFontPath = fontPath;
-            UpdateText();
-        }
-    }
-
-    void Text::SetText(const std::string& text)
-    {
-        mText = text;
-        UpdateText();
-    }
-
-    void Text::SetColor(Color color)
-    {
-        mColor = color;
-        UpdateText();
-    }
-
-    void Text::SetSize(int size)
-    {
-        mSize = size;
-        UpdateText();
-    }
-
-    void Text::Update()
-    {
-        superclass::Update();
-
-        int w = 0;
-        int h = 0;
-        TTF_GetTextSize(mTextHandle.get(), &w, &h);
-
-        SetWidth(w);
-        SetHeight(h);
-    }
-
-    void Text::UpdateText()
-    {
-        if(mSize == 0)
-        {
-            return;
-        }
-        mTextHandle = Common::CreateText(mFontPath, mSize, mText);
-        TTF_SetTextColorFloat(mTextHandle.get(), mColor.r, mColor.g, mColor.b, mColor.a);
-    }
-
-    void Text::Draw() const { TTF_DrawRendererText(mTextHandle.get(), mPositionDimension.x, mPositionDimension.y); }
-
-    void Text::DrawImguiObjectDetailsDebugMenu()
-    {
-        superclass::DrawImguiObjectDetailsDebugMenu();
-        if(ImGui::CollapsingHeader("Text", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            ImGui::Text("Text");
-            ImGui::Indent();
-
-            static char buffer[512] = {0};
-
-            std::strcpy(buffer, mText.data());
-
-            if(ImGui::InputText("##TextInput", buffer, 512))
-            {
-                SetText(buffer);
-            }
-            ImGui::Unindent();
-
-            ImGui::Text("Color");
-            ImGui::SameLine();
-            if(ImGui::ColorEdit4("Color", (float*)&mColor))
-            {
-                UpdateText();
-            }
-
-            ImGui::Text("Font");
-            ImGui::Indent();
-            ImGui::Text(mFontPath.c_str());
-            ImGui::Unindent();
-
-            ImGui::Text("Size");
-            ImGui::Indent();
-
-            static int textSize = 0;
-
-            textSize = mSize;
-
-            if(ImGui::InputInt("##TextSize", &textSize, 1, 10))
-            {
-                SetSize(textSize);
-            }
-            ImGui::Unindent();
-        }
-    }
-
     void RemoveAllObjects() { sObjects.clear(); }
 
-    void AddObject(ObjectPtr&& object) { sObjects.emplace_back(std::move(object)); }
+    void AddObject(const ObjectSharedPtr& object) { sObjects.emplace_back(std::move(object)); }
 
     void DrawImguiObjectTreeDebugMenu(const bool forceExpand)
     {
-        for(const ObjectPtr& child : sObjects)
+        for(const ObjectSharedPtr& child : sObjects)
         {
             if(child)
             {
@@ -483,7 +427,7 @@ namespace UI
 
     Object* FindObjectByPath(std::string_view path)
     {
-        for(const ObjectPtr& object : sObjects)
+        for(const ObjectSharedPtr& object : sObjects)
         {
             if(object)
             {
@@ -496,5 +440,8 @@ namespace UI
 
         return nullptr;
     }
+
+    void SetViewportWidth(float const viewportWidth) { sViewportWidth = viewportWidth; }
+    void SetViewportHeight(float const viewportHeight) { sViewportHeight = viewportHeight; }
 
 } // namespace UI

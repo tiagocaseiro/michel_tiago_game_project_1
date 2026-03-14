@@ -12,7 +12,7 @@ namespace MouseInput
     static float sMouseX = 0;
     static float sMouseY = 0;
 
-    static void OnMouseMotion() { SDL_GetMouseState(&sMouseX, &sMouseX); }
+    static void OnMouseMotion() { SDL_GetMouseState(&sMouseX, &sMouseY); }
 
     static void OnMouseButtonDown()
     {
@@ -20,7 +20,7 @@ namespace MouseInput
         {
             if(eventListener)
             {
-                eventListener->OnMouseLeftButtonDown(sMouseX, sMouseX);
+                eventListener->OnMouseLeftButtonDown(sMouseX, sMouseY);
             }
         }
     }
@@ -31,7 +31,7 @@ namespace MouseInput
         {
             if(eventListener)
             {
-                eventListener->OnMouseLeftButtonUp(sMouseX, sMouseX);
+                eventListener->OnMouseLeftButtonUp(sMouseX, sMouseY);
             }
         }
     }
