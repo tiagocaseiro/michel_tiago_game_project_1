@@ -15,11 +15,11 @@ void GameUIManager::Init()
     sGameUI->Init();
 }
 
-void GameUIManager::Update()
+void GameUIManager::Update(const GameManager& model)
 {
     if(sGameUI != nullptr && sGameUI->IsFinished() == false)
     {
-        sGameUI->Update();
+        sGameUI->Update(model);
         return;
     }
 

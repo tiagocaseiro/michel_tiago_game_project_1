@@ -19,7 +19,7 @@ private:
     PreBattleUI() = default;
 
     void Init() override;
-    void Update() override;
+    void Update(const GameManager& model) override;
     void Shutdown() override;
 
     void OnMouseLeftButtonUp(const float mouseX, const float mouseY) override;

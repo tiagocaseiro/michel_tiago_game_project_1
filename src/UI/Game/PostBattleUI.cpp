@@ -6,6 +6,6 @@
 
 void PostBattleUI::Init() {}
 
-void PostBattleUI::Update() {}
+void PostBattleUI::Update(const GameManager& model) {}
 
 void PostBattleUI::Shutdown() {}

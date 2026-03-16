@@ -5,9 +5,17 @@
 
 void PreBattleUI::Init()
 {
+
+    // preBattleBackground
+
+    std::shared_ptr<UI::Material> backgroundImage = UI::Material::Make("startButtonParent");
+    backgroundImage->SetHorizontalAlignment(UI::HorizontalAlignment::Stretch);
+    backgroundImage->SetVerticalAlignment(UI::VerticalAlignment::Stretch);
+    backgroundImage->SetImagePath("textures/preBattleBackground.png");
+
     std::shared_ptr<UI::Text> gameTitle = UI::Text::Make("gameTitle");
     gameTitle->SetFontPath("fonts/canterbury.ttf");
-    gameTitle->SetColor({0, 0, 0, 1});
+    gameTitle->SetColor({1, 1, 1, 1});
     gameTitle->SetHorizontalAlignment(UI::HorizontalAlignment::Center);
     gameTitle->SetVerticalAlignment(UI::VerticalAlignment::Top);
     gameTitle->SetTopMargin(300);
@@ -35,11 +43,13 @@ void PreBattleUI::Init()
     mStartButtonPanel = startButtonParent;
     mStartButtonLabel = startButtonLabel;
 
-    UI::AddObject(gameTitle);
-    UI::AddObject(startButtonParent);
+    backgroundImage->AddChild(gameTitle);
+    backgroundImage->AddChild(startButtonParent);
+
+    UI::AddRootObject(backgroundImage);
 }
 
-void PreBattleUI::Update() {}
+void PreBattleUI::Update(const GameManager& model) {}
 
 void PreBattleUI::OnMouseLeftButtonUp(const float mouseX, const float mouseY)
 {
@@ -49,6 +59,9 @@ void PreBattleUI::OnMouseLeftButtonUp(const float mouseX, const float mouseY)
         if(auto startButtonLabel = mStartButtonLabel.lock())
         {
             startButtonLabel->SetColor({1, 1, 1, 1});
+        }
+        if(startButtonPanel->IsInsideBounds(mouseX, mouseY))
+        {
             SetAsFinished();
         }
     }

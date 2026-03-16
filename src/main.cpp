@@ -29,7 +29,7 @@ int main(int, char**)
     float main_scale             = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
     SDL_Window* window           = SDL_CreateWindow("Dear ImGui SDL3+SDL_Renderer example", (int)(1280 * main_scale),
-                                                    (int)(800 * main_scale), window_flags);
+                                                    (int)(720 * main_scale), window_flags);
     if(window == nullptr)
     {
         Logging::LogError("Window failed to initialize: {}", SDL_GetError());
@@ -114,7 +114,7 @@ int main(int, char**)
             continue;
         }
 
-        GameUIManager::Update();
+        GameUIManager::Update(game);
         UI::Update();
 
         // Start the Dear ImGui frame
@@ -122,15 +122,7 @@ int main(int, char**)
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        ImguiDebug::DrawMenus();
-
-        static char buf1[128]            = "saveFileName";
-        static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AlwaysOverwrite;
-        ImGui::InputText("Save file name:", buf1, IM_COUNTOF(buf1), flags);
-        if(ImGui::Button("Save"))
-        {
-            game.Save(buf1);
-        }
+        ImguiDebug::DrawMenus(game);
 
         // Rendering
         ImGui::Render();

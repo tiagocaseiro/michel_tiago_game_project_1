@@ -6,6 +6,6 @@
 
 void BattleUI::Init() {}
 
-void BattleUI::Update() {}
+void BattleUI::Update(const GameManager& model) {}
 
 void BattleUI::Shutdown() {}

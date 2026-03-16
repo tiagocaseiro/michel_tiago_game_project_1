@@ -4,6 +4,8 @@
 
 #include "Input/MouseInput.h"
 
+class GameManager;
+
 namespace UI
 {
     class Material;
@@ -14,7 +16,7 @@ class GameUIManager
 {
 public:
     static void Init();
-    static void Update();
+    static void Update(const GameManager& model);
     static void Shutdown();
 };
 
@@ -26,9 +28,9 @@ public:
     virtual ~GameUI() = default;
 
 protected:
-    virtual void Init()     = 0;
-    virtual void Update()   = 0;
-    virtual void Shutdown() = 0;
+    virtual void Init()                           = 0;
+    virtual void Update(const GameManager& model) = 0;
+    virtual void Shutdown()                       = 0;
 
     bool IsFinished() const { return mIsFinished; }
     void SetAsFinished() { mIsFinished = true; }

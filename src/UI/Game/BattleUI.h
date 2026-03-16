@@ -19,6 +19,6 @@ private:
     BattleUI() = default;
 
     void Init() override;
-    void Update() override;
+    void Update(const GameManager& model) override;
     void Shutdown() override;
 };
