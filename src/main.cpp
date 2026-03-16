@@ -90,7 +90,7 @@ int main(int, char**)
     UI::SetViewportWidth(1280);
     UI::SetViewportHeight(800);
 
-    GameUI::Instance().Init();
+    GameUIManager::Init();
     // Main loop
     bool done = false;
     while(!done)
@@ -114,6 +114,7 @@ int main(int, char**)
             continue;
         }
 
+        GameUIManager::Update();
         UI::Update();
 
         // Start the Dear ImGui frame
@@ -146,7 +147,7 @@ int main(int, char**)
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
 
-    GameUI::Instance().Shutdown();
+    GameUIManager::Shutdown();
 
     Common::UnloadAllFonts();
 
