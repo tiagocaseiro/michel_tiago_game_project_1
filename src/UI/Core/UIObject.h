@@ -131,7 +131,7 @@ namespace UI
     };
 
     void RemoveAllObjects();
-    void AddObject(const ObjectSharedPtr& object);
+    void AddRootObject(const ObjectSharedPtr& object);
     void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
     void SetViewportWidth(float const viewportWidth);
     void SetViewportHeight(float const viewportHeight);

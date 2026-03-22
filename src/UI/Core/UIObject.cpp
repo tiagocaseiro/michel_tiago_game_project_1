@@ -216,6 +216,16 @@ namespace UI
                 break;
             }
             case HorizontalAlignment::Stretch:
+                if(mParent != nullptr)
+                {
+                    mPositionDimension.x = mParent->mPositionDimension.x;
+                    mPositionDimension.w = mParent->mPositionDimension.w;
+                }
+                else
+                {
+                    mPositionDimension.x = 0;
+                    mPositionDimension.w = sViewportWidth;
+                }
                 break;
             default:
                 break;
@@ -251,6 +261,16 @@ namespace UI
                 break;
             }
             case VerticalAlignment::Stretch:
+                if(mParent != nullptr)
+                {
+                    mPositionDimension.y = mParent->mPositionDimension.y;
+                    mPositionDimension.h = mParent->mPositionDimension.h;
+                }
+                else
+                {
+                    mPositionDimension.y = 0;
+                    mPositionDimension.h = sViewportHeight;
+                }
                 break;
             default:
                 break;
@@ -398,7 +418,7 @@ namespace UI
 
     void RemoveAllObjects() { sObjects.clear(); }
 
-    void AddObject(const ObjectSharedPtr& object) { sObjects.emplace_back(std::move(object)); }
+    void AddRootObject(const ObjectSharedPtr& object) { sObjects.emplace_back(std::move(object)); }
 
     void DrawImguiObjectTreeDebugMenu(const bool forceExpand)
     {

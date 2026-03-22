@@ -4,53 +4,36 @@
 
 #include "Input/MouseInput.h"
 
+class GameManager;
+
 namespace UI
 {
     class Material;
     class Text;
 }; // namespace UI
 
+class GameUIManager
+{
+public:
+    static void Init();
+    static void Update(const GameManager& model);
+    static void Shutdown();
+};
+
 class GameUI : MouseInput::EventListener
 {
-private:
-    enum class State
-    {
-        PreBattle,
-        Battle,
-        PostBattle,
-        Invalid
-    };
+    friend class GameUIManager;
 
 public:
-    static GameUI& Instance();
+    virtual ~GameUI() = default;
 
-    void Init();
-    void Update();
-    void Shutdown();
+protected:
+    virtual void Init()                           = 0;
+    virtual void Update(const GameManager& model) = 0;
+    virtual void Shutdown()                       = 0;
 
-private:
-    GameUI();
+    bool IsFinished() const { return mIsFinished; }
+    void SetAsFinished() { mIsFinished = true; }
 
-    void EnterState(State const state);
-    void ExitState(State const state);
-
-    void EnterPreBattleState();
-    void EnterBattleState();
-    void EnterPostBattleState();
-
-    void UpdatePreBattleState();
-    void UpdateBattleState();
-    void UpdatePostBattleState();
-
-    void ExitPreBattleState();
-    void ExitBattleState();
-    void ExitPostBattleState();
-
-    void OnMouseLeftButtonUp(const float mouseX, const float mouseY) override;
-    void OnMouseLeftButtonDown(const float mouseX, const float mouseY) override;
-
-    std::weak_ptr<UI::Material> mStartButtonPanel;
-    std::weak_ptr<UI::Text> mStartButtonLabel;
-
-    State mState;
+    bool mIsFinished = false;
 };
