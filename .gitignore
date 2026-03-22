@@ -42,3 +42,6 @@
 build/**
 dependencies/imgui.ini
 .vscode/
+
+# clion dirs
+.idea/
