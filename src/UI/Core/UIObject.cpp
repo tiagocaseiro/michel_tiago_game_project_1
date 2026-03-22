@@ -7,6 +7,8 @@
 #include "Common/Data.h"
 #include "Tools/Logging.h"
 
+#include <algorithm>
+
 struct SDL_Renderer;
 
 namespace UI

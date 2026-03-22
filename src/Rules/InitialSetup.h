@@ -18,5 +18,5 @@ struct InitialSetup
     int mNumFlags{9};
 
 private:
-    static const int DEFAULT_CARDS_PER_COLOUR{10};
+    static constexpr int DEFAULT_CARDS_PER_COLOUR{10};
 };
