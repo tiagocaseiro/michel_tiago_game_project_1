@@ -3,6 +3,7 @@
 #include "Board.h"
 #include "CardManager.h"
 #include "Player.h"
+#include "TurnManager.h"
 
 #include "Rules/FormationRules.h"
 #include "Rules/GameplayRules.h"
@@ -23,10 +24,13 @@ private:
     void StartGame(const InitialSetup& initialSetup);
     void DistributeInitialCards(const InitialSetup& initialSetup, Player& player);
 
+    // #TODO: In order to support save-load, we really need players to live on a player manager
+    // and be accessible through their GUIDs
     Player mPlayer1;
     Player mPlayer2;
     Board mBoard;
     ActionManager mActionManager;
+    TurnManager mTurnManager;
 
     // #TODO: We could have the option to data-drive these
     FormationRules mFormationRules;

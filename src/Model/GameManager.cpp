@@ -9,6 +9,7 @@ GameManager::GameManager(const FormationRules& formationRules, const GameplayRul
                          const InitialSetup& initialSetup)
     : mBoard(mPlayer1, mPlayer2, initialSetup),
       mActionManager(mBoard),
+      mTurnManager(mPlayer1, mPlayer2),
       mFormationRules(formationRules),
       mGameplayRules(gameplayRules)
 {
