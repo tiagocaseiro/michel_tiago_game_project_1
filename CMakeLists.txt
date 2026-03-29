@@ -15,8 +15,8 @@ file(GLOB SOURCE_FILES_PATH
         src/Input/*.cpp
         src/GameUI/*.cpp
         src/Model/*.cpp 
-	src/Rules/*.cpp
-	src/Actions/*.cpp
+		src/Rules/*.cpp
+		src/Actions/*.cpp
         src/UI/Core/*.cpp 
         src/UI/Game/*.cpp 
         src/Tools/*.cpp
