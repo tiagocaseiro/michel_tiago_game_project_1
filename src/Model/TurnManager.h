@@ -23,6 +23,7 @@ public:
     {
     }
 
+    Player& GetActivePlayer() { return const_cast<Player&>(mPlayers[mPlayerIndex].get()); } // #TODO: REMOVE CONST CAST once going through player manager
     const Player& GetActivePlayer() const { return mPlayers[mPlayerIndex]; }
     int GetTurnNumber() const { return mTurnNumber; }
     int GetPlayerIndex() const { return mPlayerIndex; }
