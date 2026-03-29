@@ -1,8 +1,11 @@
 #pragma once
+
 #include "Player.h"
 #include "Tools/Logging.h"
 
 #include <vector>
+#include <functional>
+#include <array>
 
 enum TurnPhase
 {

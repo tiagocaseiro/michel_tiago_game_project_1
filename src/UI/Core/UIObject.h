@@ -18,8 +18,11 @@ public:                                                                         
 
 #define DECLARE_UI_ELEMENT(UIClassName) DECLARE_UI_ELEMENT_DERIVED(UIClassName, Object)
 #else
-explicit UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                         \
-static auto Make(const std::string& id) { return std::shared_ptr<UIClassName##>(new UIClassName##(id)); }
+#define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
+public:                                                                                                                \
+    using superclass = UIClassNameParent;                                                                               \
+    explicit UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                         \
+    static auto Make(const std::string& id) { return std::shared_ptr<UIClassName##>(new UIClassName##(id)); }
 
 #define DECLARE_UI_ELEMENT(UIClassName) DECLARE_UI_ELEMENT_DERIVED(##UIClassName, Object)
 #endif
