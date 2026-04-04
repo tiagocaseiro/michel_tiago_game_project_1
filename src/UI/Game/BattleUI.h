@@ -25,7 +25,7 @@ private:
 
     void InitializeFlags(const Board& board);
 
-    std::shared_ptr<UI::StackPanel> mFlagsPanel;
-    std::shared_ptr<UI::StackPanel> mPlayer1HandPanel;
-    std::shared_ptr<UI::StackPanel> mPlayer2HandPanel;
+    std::weak_ptr<UI::StackPanel> mFlagsPanel;
+    std::weak_ptr<UI::StackPanel> mPlayer1HandPanel;
+    std::weak_ptr<UI::StackPanel> mPlayer2HandPanel;
 };

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace pugi
 {
@@ -12,7 +13,7 @@ namespace UI
 {
     class Object;
 
-    std::shared_ptr<UI::Object> DeserializeLayout(std::string_view filePath);
-    std::shared_ptr<Object> DeserializeNode(const pugi::xml_node& node);
+    std::vector<std::shared_ptr<Object>> DeserializeLayout(std::string_view filePath);
+    std::shared_ptr<UI::Object> DeserializeNode(const pugi::xml_node& node);
 
 } // namespace UI

@@ -33,16 +33,21 @@ namespace UI
         return {};
     }
 
-    std::shared_ptr<Object> DeserializeLayout(std::string_view filePath)
+    std::vector<std::shared_ptr<Object>> DeserializeLayout(std::string_view filePath)
     {
+        std::vector<std::shared_ptr<Object>> rootObjects;
+
         pugi::xml_document doc;
         pugi::xml_parse_result result = doc.load_file(filePath.data());
         if(result == false)
         {
-            return {};
+            return rootObjects;
         }
-        auto it = doc.begin();
 
-        return DeserializeNode(*it);
+        for(auto it = doc.begin(); it != doc.end(); it++)
+        {
+            rootObjects.push_back(DeserializeNode(*it));
+        }
+        return rootObjects;
     }
 } // namespace UI

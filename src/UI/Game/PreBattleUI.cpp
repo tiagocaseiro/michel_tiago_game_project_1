@@ -7,7 +7,11 @@
 
 void PreBattleUI::Init()
 {
-    UI::AddRootObject(UI::DeserializeLayout("ui/pre_battle.xml"));
+    for(UI::ObjectSharedPtr rootObject : UI::DeserializeLayout("ui/pre_battle.xml"))
+    {
+        UI::AddRootObject(rootObject);
+    }
+
     mStartButtonPanel = UI::FindObjectByPath<UI::Material>("preBattleBackground.startButtonBackground");
     mStartButtonLabel = UI::FindObjectByPath<UI::Text>("preBattleBackground.startButtonBackground.startButtonLabel");
 }

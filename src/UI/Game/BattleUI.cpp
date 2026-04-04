@@ -31,40 +31,16 @@ static std::shared_ptr<UI::Material> MakeFlagInstance(int index)
     return flagInstance;
 }
 
-static std::shared_ptr<UI::StackPanel> MakeHandPanel(int playerIndex)
-{
-    std::shared_ptr<UI::StackPanel> handPanel = UI::StackPanel::Make("handPanel" + std::to_string(playerIndex));
-
-    handPanel->SetOrientation(UI::StackPanel::Orientation::Horizontal);
-    handPanel->SetPadding(20);
-    handPanel->SetVerticalAlignment(playerIndex == 0 ? UI::VerticalAlignment::Top : UI::VerticalAlignment::Bottom);
-    handPanel->SetHorizontalAlignment(UI::HorizontalAlignment::Center);
-
-    return handPanel;
-}
-
-static std::shared_ptr<UI::StackPanel> MakeFlagPanel()
-{
-    std::shared_ptr<UI::StackPanel> flagsPanel = UI::StackPanel::Make("flagsPanel");
-
-    flagsPanel->SetPadding(10);
-    flagsPanel->SetVerticalAlignment(UI::VerticalAlignment::Center);
-    flagsPanel->SetHorizontalAlignment(UI::HorizontalAlignment::Center);
-
-    return flagsPanel;
-}
-
 void BattleUI::Init()
 {
-    UI::DeserializeLayout("ui/button.ui_layout");
-    mPlayer1HandPanel = MakeHandPanel(0);
-    mPlayer2HandPanel = MakeHandPanel(1);
+    for(UI::ObjectSharedPtr rootObject : UI::DeserializeLayout("ui/battle.xml"))
+    {
+        UI::AddRootObject(rootObject);
+    }
 
-    UI::AddRootObject(mPlayer1HandPanel);
-    UI::AddRootObject(mPlayer2HandPanel);
-
-    mFlagsPanel = MakeFlagPanel();
-    UI::AddRootObject(mFlagsPanel);
+    mPlayer1HandPanel = UI::FindObjectByPath<UI::StackPanel>("handPanel0");
+    mPlayer2HandPanel = UI::FindObjectByPath<UI::StackPanel>("handPanel1");
+    mFlagsPanel       = UI::FindObjectByPath<UI::StackPanel>("flagsPanel");
 }
 
 void InitializeHandCards(UI::StackPanel& handPanel, const Player& player)
@@ -79,19 +55,22 @@ void BattleUI::Update(const GameManager& model)
 {
     const Board& board = model.GetBoard();
 
-    if(mFlagsPanel && mFlagsPanel->Children().empty())
+    std::shared_ptr<UI::StackPanel> flagsPanel = mFlagsPanel.lock();
+    if(flagsPanel && flagsPanel->Children().empty())
     {
         InitializeFlags(board);
     }
 
-    if(mPlayer1HandPanel && mPlayer1HandPanel->Children().empty())
+    std::shared_ptr<UI::StackPanel> player1HandPanel = mPlayer1HandPanel.lock();
+    if(player1HandPanel && player1HandPanel->Children().empty())
     {
-        InitializeHandCards(*mPlayer1HandPanel, board.mPlayer1);
+        InitializeHandCards(*player1HandPanel, board.mPlayer1);
     }
 
-    if(mPlayer2HandPanel && mPlayer2HandPanel->Children().empty())
+    std::shared_ptr<UI::StackPanel> player2HandPanel = mPlayer2HandPanel.lock();
+    if(player2HandPanel && player2HandPanel->Children().empty())
     {
-        InitializeHandCards(*mPlayer2HandPanel, board.mPlayer2);
+        InitializeHandCards(*player2HandPanel, board.mPlayer2);
     }
 }
 
@@ -99,11 +78,11 @@ void BattleUI::Shutdown() {}
 
 void BattleUI::InitializeFlags(const Board& board)
 {
-    if(mFlagsPanel)
+    if(std::shared_ptr<UI::StackPanel> flagsPanel = mFlagsPanel.lock())
     {
         for(int i = 0; i != board.mFlags.size(); i++)
         {
-            mFlagsPanel->AddChild(MakeFlagInstance(i));
+            flagsPanel->AddChild(MakeFlagInstance(i));
         }
     }
 }
