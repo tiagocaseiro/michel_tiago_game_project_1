@@ -445,7 +445,7 @@ namespace UI
 
         if(auto height = node.child("Height"))
         {
-            mPositionDimension.w = height.text().as_float();
+            mPositionDimension.h = height.text().as_float();
         }
 
         if(auto marginLeft = node.child("MarginLeft"))
