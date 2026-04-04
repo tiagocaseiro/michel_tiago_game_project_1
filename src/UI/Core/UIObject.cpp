@@ -391,12 +391,13 @@ namespace UI
         }
     }
 
-    Object* Object::FindObjectByPath(std::string_view path)
+    ObjectSharedPtr Object::FindObjectByPath(std::string_view path)
     {
         if(path == mId)
         {
-            return this;
+            return shared_from_this();
         }
+
         // This can be more efficient by storing a path object
         // It's hella heavy to do all this string manipulation every time we search a path
         // Also we don't want to depend on '.'
@@ -411,7 +412,7 @@ namespace UI
             {
                 if(object)
                 {
-                    if(Object* foundObject = object->FindObjectByPath(rest))
+                    if(ObjectSharedPtr foundObject = object->FindObjectByPath(rest))
                     {
                         return foundObject;
                     }
@@ -604,13 +605,13 @@ namespace UI
         }
     }
 
-    Object* FindObjectByPath(std::string_view path)
+    ObjectSharedPtr FindObjectByPath(std::string_view path)
     {
         for(const ObjectSharedPtr& rootObject : sRootObjects)
         {
             if(rootObject)
             {
-                if(Object* foundObject = rootObject->FindObjectByPath(path))
+                if(ObjectSharedPtr foundObject = rootObject->FindObjectByPath(path))
                 {
                     return foundObject;
                 }

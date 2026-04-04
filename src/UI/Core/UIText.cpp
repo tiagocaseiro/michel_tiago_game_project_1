@@ -40,14 +40,14 @@ namespace UI
             SetColor(Common::StringToColor(color.text().as_string()));
         }
 
-        if(auto size = node.child("Size"))
-        {
-            SetSize(size.text().as_int());
-        }
-
         if(auto fontPath = node.child("FontPath"))
         {
             SetFontPath(fontPath.text().as_string());
+        }
+
+        if(auto size = node.child("Size"))
+        {
+            SetSize(size.text().as_int());
         }
 
         if(auto text = node.child("Text"))

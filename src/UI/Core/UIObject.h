@@ -15,7 +15,7 @@
 public:                                                                                                                \
     using superclass = UIClassNameParent;                                                                              \
     explicit UIClassName(const std::string& id) : UIClassNameParent(id) {}                                             \
-    static auto Make(const std::string& id) { return std::shared_ptr<UIClassName>(new UIClassName(id)); }              \
+    static auto Make(const std::string& id) { return std::make_shared<UIClassName>(id); }                              \
     static auto Make(const pugi::xml_node& node)                                                                       \
     {                                                                                                                  \
         if(node.name() != ClassId())                                                                                   \
@@ -76,7 +76,7 @@ namespace UI
     void Draw();
     void DrawDebug();
 
-    class Object
+    class Object : public std::enable_shared_from_this<Object>
     {
         friend class StackPanel;
 
@@ -86,6 +86,8 @@ namespace UI
         virtual ~Object();
 
         virtual void Draw() const = 0;
+
+        const std::string& Id() const { return mId; }
 
         void SetHeight(float const height) { mPositionDimension.h = height; }
         void SetWidth(float const width) { mPositionDimension.w = width; }
@@ -110,7 +112,7 @@ namespace UI
 
         void AddChild(const ObjectSharedPtr& object);
 
-        Object* FindObjectByPath(std::string_view path);
+        ObjectSharedPtr FindObjectByPath(std::string_view path);
 
     protected:
         bool GetVisibility() const { return mVisible; }
@@ -139,7 +141,7 @@ namespace UI
         {
         }
 
-        std::string mId;
+        const std::string mId;
 
         const Object* mParent;
 
@@ -162,7 +164,14 @@ namespace UI
     void AddRootObject(const ObjectSharedPtr& object);
     void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
 
-    Object* FindObjectByPath(std::string_view path);
+    ObjectSharedPtr FindObjectByPath(std::string_view path);
+
+    template <typename T>
+    std::shared_ptr<T> FindObjectByPath(std::string_view path)
+    {
+        ObjectSharedPtr foundObject = FindObjectByPath(path);
+        return std::dynamic_pointer_cast<T>(foundObject);
+    }
 
     HorizontalAlignment StringToHorizontalAlignmentEnum(const std::string& horizontalAlignment);
     VerticalAlignment StringToVerticalAlignmentEnum(const std::string& verticalAlignment);

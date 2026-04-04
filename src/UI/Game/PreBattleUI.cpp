@@ -5,7 +5,12 @@
 #include "UI/Core/UIStore.h"
 #include "UI/Core/UIText.h"
 
-void PreBattleUI::Init() { UI::AddRootObject(UI::DeserializeLayout("ui/pre_battle.xml")); }
+void PreBattleUI::Init()
+{
+    UI::AddRootObject(UI::DeserializeLayout("ui/pre_battle.xml"));
+    mStartButtonPanel = UI::FindObjectByPath<UI::Material>("preBattleBackground.startButtonBackground");
+    mStartButtonLabel = UI::FindObjectByPath<UI::Text>("preBattleBackground.startButtonBackground.startButtonLabel");
+}
 
 void PreBattleUI::Update(const GameManager& model) {}
 
