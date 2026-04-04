@@ -163,4 +163,8 @@ namespace UI
     void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
 
     Object* FindObjectByPath(std::string_view path);
+
+    HorizontalAlignment StringToHorizontalAlignmentEnum(const std::string& horizontalAlignment);
+    VerticalAlignment StringToVerticalAlignmentEnum(const std::string& verticalAlignment);
+
 } // namespace UI

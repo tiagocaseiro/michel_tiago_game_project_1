@@ -438,55 +438,52 @@ namespace UI
 
     void Object::Initialize(const pugi::xml_node& node)
     {
-        assert(true, "Add if node checks");
-
-        mPositionDimension.w = node.child("Width").text().as_float();
-        mPositionDimension.h = node.child("Height").text().as_float();
-        mMargin.left         = node.child("MarginLeft").text().as_float();
-        mMargin.right        = node.child("MarginRight").text().as_float();
-        mMargin.top          = node.child("MarginTop").text().as_float();
-        mMargin.bottom       = node.child("MarginBottom").text().as_float();
-
-        const std::string horizontalAlignment = node.child("HorizontalAlignment").text().as_string();
-        if(horizontalAlignment == "Left")
+        if(auto width = node.child("Width"))
         {
-            mHorizontalAlignment = HorizontalAlignment::Left;
-        }
-        else if(horizontalAlignment == "Right")
-        {
-            mHorizontalAlignment = HorizontalAlignment::Right;
-        }
-        else if(horizontalAlignment == "Center")
-        {
-            mHorizontalAlignment = HorizontalAlignment::Center;
-        }
-        else if(horizontalAlignment == "Stretch")
-        {
-            mHorizontalAlignment = HorizontalAlignment::Stretch;
+            mPositionDimension.w = width.text().as_float();
         }
 
-        const std::string verticalAlignment = node.child("VerticalAlignment").text().as_string();
-        if(verticalAlignment == "Left")
+        if(auto height = node.child("Height"))
         {
-            mVerticalAlignment = VerticalAlignment::Top;
-        }
-        else if(verticalAlignment == "Right")
-        {
-            mVerticalAlignment = VerticalAlignment::Bottom;
-        }
-        else if(verticalAlignment == "Center")
-        {
-            mVerticalAlignment = VerticalAlignment::Center;
-        }
-        else if(verticalAlignment == "Stretch")
-        {
-            mVerticalAlignment = VerticalAlignment::Stretch;
+            mPositionDimension.w = height.text().as_float();
         }
 
-        auto children = node.child("Children");
-        for(auto it = children.begin(); it != children.end(); it++)
+        if(auto marginLeft = node.child("MarginLeft"))
         {
-            AddChild(DeserializeNode(*it));
+            mMargin.left = marginLeft.text().as_float();
+        }
+
+        if(auto marginRight = node.child("MarginRight"))
+        {
+            mMargin.right = marginRight.text().as_float();
+        }
+
+        if(auto marginTop = node.child("MarginTop"))
+        {
+            mMargin.top = marginTop.text().as_float();
+        }
+
+        if(auto marginBottom = node.child("MarginBottom"))
+        {
+            mMargin.bottom = marginBottom.text().as_float();
+        }
+
+        if(auto horizontalAlignment = node.child("HorizontalAlignment"))
+        {
+            mHorizontalAlignment = StringToHorizontalAlignmentEnum(horizontalAlignment.text().as_string());
+        }
+
+        if(auto verticalAlignment = node.child("VerticalAlignment"))
+        {
+            mVerticalAlignment = StringToVerticalAlignmentEnum(verticalAlignment.text().as_string());
+        }
+
+        if(auto children = node.child("Children"))
+        {
+            for(auto it = children.begin(); it != children.end(); it++)
+            {
+                AddChild(DeserializeNode(*it));
+            }
         }
     }
 
@@ -622,4 +619,55 @@ namespace UI
 
         return nullptr;
     }
+
+    HorizontalAlignment StringToHorizontalAlignmentEnum(const std::string& horizontalAlignment)
+    {
+        if(horizontalAlignment == "Left")
+        {
+            return HorizontalAlignment::Left;
+        }
+
+        if(horizontalAlignment == "Right")
+        {
+            return HorizontalAlignment::Right;
+        }
+
+        if(horizontalAlignment == "Center")
+        {
+            return HorizontalAlignment::Center;
+        }
+
+        if(horizontalAlignment == "Stretch")
+        {
+            return HorizontalAlignment::Stretch;
+        }
+
+        return HorizontalAlignment::Stretch;
+    }
+
+    VerticalAlignment StringToVerticalAlignmentEnum(const std::string& verticalAlignment)
+    {
+        if(verticalAlignment == "Top")
+        {
+            return VerticalAlignment::Top;
+        }
+
+        if(verticalAlignment == "Bottom")
+        {
+            return VerticalAlignment::Bottom;
+        }
+
+        if(verticalAlignment == "Center")
+        {
+            return VerticalAlignment::Center;
+        }
+
+        if(verticalAlignment == "Stretch")
+        {
+            return VerticalAlignment::Stretch;
+        }
+
+        return VerticalAlignment::Stretch;
+    }
+
 } // namespace UI

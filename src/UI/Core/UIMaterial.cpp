@@ -56,7 +56,7 @@ namespace UI
 
         if(auto texturePath = node.child("TexturePath"))
         {
-            SetTexturePath(node.child("TexturePath").text().as_string());
+            SetTexturePath(texturePath.text().as_string());
         }
     }
 } // namespace UI
