@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Common/Color.h"
+
 enum class CardColour
 {
     Red,
@@ -32,4 +34,25 @@ namespace EnumUtil
                 return "Unknown";
         }
     }
-}
+
+    constexpr auto ToColor(CardColour colour)
+    {
+        switch(colour)
+        {
+            case CardColour::Red:
+                return Common::Color::Red;
+            case CardColour::Green:
+                return Common::Color::Green;
+            case CardColour::Blue:
+                return Common::Color::Blue;
+            case CardColour::Yellow:
+                return Common::Color::Yellow;
+            case CardColour::Purple:
+                return Common::Color::Purple;
+            case CardColour::Brown:
+                return Common::Color::Brown;
+            default:
+                return Common::Color::Black;
+        }
+    }
+} // namespace EnumUtil

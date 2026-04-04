@@ -31,6 +31,17 @@ namespace UI
         UpdateText();
     }
 
+    void Text::Initialize(const pugi::xml_node& node)
+    {
+        superclass::Initialize(node);
+
+        assert(true, "Add if node checks");
+        SetColor(Common::StringToColor(node.child("Color").text().as_string()));
+        SetSize(node.child("Size").text().as_int());
+        SetFontPath(node.child("FontPath").text().as_string());
+        SetText(node.child("Text").text().as_string());
+    }
+
     void Text::Update()
     {
         superclass::Update();

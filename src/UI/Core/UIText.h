@@ -14,6 +14,8 @@ namespace UI
         void SetColor(Color color);
         void SetSize(int size);
 
+        void Initialize(const pugi::xml_node& node);
+
     protected:
         void Update() override;
 
@@ -26,10 +28,10 @@ namespace UI
         virtual void Draw() const override;
         virtual void DrawImguiObjectDetailsDebugMenu() override;
 
-        Color mColor = Common::Color::BLACK;
-        int mSize    = 0;
-
         SDLTextUniquePtr mTextHandle = Common::EmptyText();
+
+        Color mColor = Common::Color::Black;
+        int mSize    = 0;
 
         std::string mFontPath;
         std::string mText;

@@ -5,6 +5,7 @@ project(michel-tiago-game-project-1 LANGUAGES CXX)
 find_package(SDL3 REQUIRED)
 find_package(SDL3_ttf REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(pugixml CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,8 +16,8 @@ file(GLOB SOURCE_FILES_PATH
         src/Input/*.cpp
         src/GameUI/*.cpp
         src/Model/*.cpp 
-		src/Rules/*.cpp
-		src/Actions/*.cpp
+	src/Rules/*.cpp
+	src/Actions/*.cpp
         src/UI/Core/*.cpp 
         src/UI/Game/*.cpp 
         src/Tools/*.cpp
@@ -38,6 +39,7 @@ set_target_properties(michel-tiago-game-project-1 PROPERTIES LINKER_LANGUAGE CXX
 target_link_libraries(michel-tiago-game-project-1 PRIVATE SDL3::SDL3)
 target_link_libraries(michel-tiago-game-project-1 PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 target_link_libraries(michel-tiago-game-project-1 PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(michel-tiago-game-project-1 PRIVATE pugixml)
 
 add_custom_command(
         TARGET michel-tiago-game-project-1 POST_BUILD
@@ -45,9 +47,14 @@ add_custom_command(
                 ${CMAKE_SOURCE_DIR}/textures
                 $<TARGET_FILE_DIR:michel-tiago-game-project-1>/textures)
 
-
 add_custom_command(
         TARGET michel-tiago-game-project-1 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${CMAKE_SOURCE_DIR}/fonts
                 $<TARGET_FILE_DIR:michel-tiago-game-project-1>/fonts)
+
+add_custom_command(
+        TARGET michel-tiago-game-project-1 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_SOURCE_DIR}/ui
+                $<TARGET_FILE_DIR:michel-tiago-game-project-1>/ui)

@@ -3,29 +3,42 @@
 #include <string>
 #include <vector>
 
+#include <pugixml.hpp>
+
 #include "Common/Color.h"
 #include "Common/Text.h"
 #include "Common/Texture.h"
 
 #include "Tools/ImguiDebug.h"
 
-#ifdef __APPLE__
 #define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
 public:                                                                                                                \
     using superclass = UIClassNameParent;                                                                              \
-    explicit UIClassName(const std::string& id) : UIClassNameParent(id) {}                                         \
-    static auto Make(const std::string& id) { return std::shared_ptr<UIClassName>(new UIClassName(id)); }
+    explicit UIClassName(const std::string& id) : UIClassNameParent(id) {}                                             \
+    static auto Make(const std::string& id) { return std::shared_ptr<UIClassName>(new UIClassName(id)); }              \
+    static auto Make(const pugi::xml_node& node)                                                                       \
+    {                                                                                                                  \
+        if(node.name() != ClassId())                                                                                   \
+        {                                                                                                              \
+            return std::shared_ptr<UIClassName>{};                                                                     \
+        }                                                                                                              \
+        const std::string id = node.child("Id").text().as_string();                                                    \
+        if(id.empty())                                                                                                 \
+        {                                                                                                              \
+            return std::shared_ptr<UIClassName>{};                                                                     \
+        }                                                                                                              \
+        auto object = Make(id);                                                                                        \
+        object->Initialize(node);                                                                                      \
+        return object;                                                                                                 \
+    }                                                                                                                  \
+    static std::string ClassId() { return #UIClassName; }
 
 #define DECLARE_UI_ELEMENT(UIClassName) DECLARE_UI_ELEMENT_DERIVED(UIClassName, Object)
-#else
-#define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
-public:                                                                                                                \
-    using superclass = UIClassNameParent;                                                                               \
-    explicit UIClassName##(const std::string& id) : UIClassNameParent##(id) {}                                         \
-    static auto Make(const std::string& id) { return std::shared_ptr<UIClassName##>(new UIClassName##(id)); }
 
-#define DECLARE_UI_ELEMENT(UIClassName) DECLARE_UI_ELEMENT_DERIVED(##UIClassName, Object)
-#endif
+namespace pugi
+{
+    class xml_node;
+}
 
 namespace UI
 {
@@ -65,6 +78,8 @@ namespace UI
 
     class Object
     {
+        friend class StackPanel;
+
     public:
         Object(const Object&)            = delete;
         Object& operator=(const Object&) = delete;
@@ -82,8 +97,9 @@ namespace UI
         void SetVisibility(bool const visibility) { mVisible = visibility; }
         void SetHorizontalAlignment(HorizontalAlignment const hAlignment) { mHorizontalAlignment = hAlignment; }
         void SetVerticalAlignment(VerticalAlignment const vAlignment) { mVerticalAlignment = vAlignment; }
-
         void SetParent(Object& parent);
+
+        const std::vector<std::shared_ptr<Object>>& Children() { return mChildren; }
 
         bool IsInsideBounds(const float x, const float y);
 
@@ -109,6 +125,8 @@ namespace UI
 
         void DrawChildren() const;
 
+        void Initialize(const pugi::xml_node& node);
+
         explicit Object(const std::string& id)
             : mId(id),
               mParent(nullptr),
@@ -121,7 +139,7 @@ namespace UI
         {
         }
 
-        const std::string mId;
+        std::string mId;
 
         const Object* mParent;
 
@@ -143,8 +161,6 @@ namespace UI
     void RemoveAllObjects();
     void AddRootObject(const ObjectSharedPtr& object);
     void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
-    void SetViewportWidth(float const viewportWidth);
-    void SetViewportHeight(float const viewportHeight);
 
     Object* FindObjectByPath(std::string_view path);
 } // namespace UI

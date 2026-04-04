@@ -87,9 +87,6 @@ int main(int, char**)
     ImGui_ImplSDLRenderer3_Init(renderer);
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    UI::SetViewportWidth(1280);
-    UI::SetViewportHeight(800);
-
     GameUIManager::Init();
     // Main loop
     bool done = false;

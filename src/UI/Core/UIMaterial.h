@@ -9,8 +9,10 @@ namespace UI
         DECLARE_UI_ELEMENT(Material);
 
     public:
-        void SetImagePath(const std::string& imagePath);
+        void SetTexturePath(const std::string& imagePath);
         void SetColor(Color color) { mColor = color; }
+
+        void Initialize(const pugi::xml_node& node);
 
     private:
         virtual void Draw() const override;
@@ -18,7 +20,7 @@ namespace UI
         virtual void DrawImguiObjectDetailsDebugMenu() override;
 
         SDLTextureUniquePtr mTextureHandle = Common::EmptyTexture();
-        Color mColor                       = Common::Color::TRANSPARENT;
+        Color mColor                       = Common::Color::Transparent;
         std::string mTexturePath;
     };
 

@@ -7,9 +7,10 @@
 
 namespace UI
 {
-    class Material;
-    class Text;
+    class StackPanel;
 }; // namespace UI
+
+class Board;
 
 class BattleUI : public GameUI
 {
@@ -21,4 +22,10 @@ private:
     void Init() override;
     void Update(const GameManager& model) override;
     void Shutdown() override;
+
+    void InitializeFlags(const Board& board);
+
+    std::shared_ptr<UI::StackPanel> mFlagsPanel;
+    std::shared_ptr<UI::StackPanel> mPlayer1HandPanel;
+    std::shared_ptr<UI::StackPanel> mPlayer2HandPanel;
 };

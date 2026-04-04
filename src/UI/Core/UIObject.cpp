@@ -1,13 +1,14 @@
 #include "UIObject.h"
 
+#include <algorithm>
+
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "imgui.h"
 
 #include "Common/Data.h"
 #include "Tools/Logging.h"
-
-#include <algorithm>
+#include "UI/Core/UIDeserializer.h"
 
 struct SDL_Renderer;
 
@@ -21,26 +22,44 @@ namespace UI
     static float sViewportWidth  = 1.0f;
     static float sViewportHeight = 1.0f;
 
-    std::vector<ObjectSharedPtr> sObjects;
+    std::vector<ObjectSharedPtr> sRootObjects;
+
+    bool IsRootObject(const Object* const object)
+    {
+        for(ObjectSharedPtr& rootObject : sRootObjects)
+        {
+            if(rootObject.get() == object)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     void Update()
     {
-        for(ObjectSharedPtr& object : sObjects)
+        SDL_Rect viewport;
+        SDL_GetRenderViewport(Common::GetRenderer(), &viewport);
+        sViewportWidth  = viewport.w;
+        sViewportHeight = viewport.h;
+
+        for(ObjectSharedPtr& rootObject : sRootObjects)
         {
-            if(object)
+            if(rootObject)
             {
-                object->Update();
+                rootObject->Update();
             }
         }
     }
 
     void Draw()
     {
-        for(ObjectSharedPtr& object : sObjects)
+        for(ObjectSharedPtr& rootObject : sRootObjects)
         {
-            if(object)
+            if(rootObject)
             {
-                object->Draw();
+                rootObject->Draw();
             }
         }
     }
@@ -138,6 +157,48 @@ namespace UI
             ImGui::Indent();
             ImGui::Text(mPath.c_str());
             ImGui::Unindent();
+
+            ImGui::Text("Vertical Alignment");
+            ImGui::Indent();
+            switch(mVerticalAlignment)
+            {
+                case VerticalAlignment::Top:
+                    ImGui::Text("Top");
+                    break;
+                case VerticalAlignment::Bottom:
+                    ImGui::Text("Bottom");
+                    break;
+                case VerticalAlignment::Center:
+                    ImGui::Text("Center");
+                    break;
+                case VerticalAlignment::Stretch:
+                    ImGui::Text("Stretch");
+                    break;
+                default:
+                    break;
+            }
+            ImGui::Unindent();
+
+            ImGui::Text("Vertical Alignment");
+            ImGui::Indent();
+            switch(mHorizontalAlignment)
+            {
+                case HorizontalAlignment::Left:
+                    ImGui::Text("Left");
+                    break;
+                case HorizontalAlignment::Right:
+                    ImGui::Text("Right");
+                    break;
+                case HorizontalAlignment::Center:
+                    ImGui::Text("Center");
+                    break;
+                case HorizontalAlignment::Stretch:
+                    ImGui::Text("Stretch");
+                    break;
+                default:
+                    break;
+            }
+            ImGui::Unindent();
         }
     }
 
@@ -184,7 +245,48 @@ namespace UI
 
     void Object::RemoveAllChildren() { mChildren.clear(); }
 
-    void Object::UpdateDimensions() {}
+    void Object::UpdateDimensions()
+    {
+        switch(mHorizontalAlignment)
+        {
+            case HorizontalAlignment::Left:
+            case HorizontalAlignment::Right:
+            case HorizontalAlignment::Center:
+                break;
+            case HorizontalAlignment::Stretch:
+                if(mParent != nullptr)
+                {
+                    mPositionDimension.w = mParent->mPositionDimension.w;
+                }
+                else
+                {
+                    mPositionDimension.w = sViewportWidth;
+                }
+                break;
+            default:
+                break;
+        }
+
+        switch(mVerticalAlignment)
+        {
+            case VerticalAlignment::Top:
+            case VerticalAlignment::Bottom:
+            case VerticalAlignment::Center:
+                break;
+            case VerticalAlignment::Stretch:
+                if(mParent != nullptr)
+                {
+                    mPositionDimension.h = mParent->mPositionDimension.h;
+                }
+                else
+                {
+                    mPositionDimension.h = sViewportHeight;
+                }
+                break;
+            default:
+                break;
+        }
+    }
 
     void Object::UpdatePosition()
     {
@@ -221,12 +323,10 @@ namespace UI
                 if(mParent != nullptr)
                 {
                     mPositionDimension.x = mParent->mPositionDimension.x;
-                    mPositionDimension.w = mParent->mPositionDimension.w;
                 }
                 else
                 {
                     mPositionDimension.x = 0;
-                    mPositionDimension.w = sViewportWidth;
                 }
                 break;
             default:
@@ -238,7 +338,7 @@ namespace UI
             case VerticalAlignment::Top:
             {
                 float topParentOffset = 0;
-                if(mParent != 0)
+                if(mParent != nullptr)
                 {
                     topParentOffset = mParent->mPositionDimension.y;
                 }
@@ -246,7 +346,19 @@ namespace UI
                 break;
             }
             case VerticalAlignment::Bottom:
+            {
+                float leftParentOffset = 0;
+                if(mParent != nullptr)
+                {
+                    leftParentOffset = mParent->mPositionDimension.y;
+                }
+                else
+                {
+                    leftParentOffset = sViewportHeight - mPositionDimension.h;
+                }
+                mPositionDimension.y = leftParentOffset - mMargin.bottom;
                 break;
+            }
             case VerticalAlignment::Center:
             {
                 if(mParent != nullptr)
@@ -324,6 +436,60 @@ namespace UI
         UpdatePath();
     }
 
+    void Object::Initialize(const pugi::xml_node& node)
+    {
+        assert(true, "Add if node checks");
+
+        mPositionDimension.w = node.child("Width").text().as_float();
+        mPositionDimension.h = node.child("Height").text().as_float();
+        mMargin.left         = node.child("MarginLeft").text().as_float();
+        mMargin.right        = node.child("MarginRight").text().as_float();
+        mMargin.top          = node.child("MarginTop").text().as_float();
+        mMargin.bottom       = node.child("MarginBottom").text().as_float();
+
+        const std::string horizontalAlignment = node.child("HorizontalAlignment").text().as_string();
+        if(horizontalAlignment == "Left")
+        {
+            mHorizontalAlignment = HorizontalAlignment::Left;
+        }
+        else if(horizontalAlignment == "Right")
+        {
+            mHorizontalAlignment = HorizontalAlignment::Right;
+        }
+        else if(horizontalAlignment == "Center")
+        {
+            mHorizontalAlignment = HorizontalAlignment::Center;
+        }
+        else if(horizontalAlignment == "Stretch")
+        {
+            mHorizontalAlignment = HorizontalAlignment::Stretch;
+        }
+
+        const std::string verticalAlignment = node.child("VerticalAlignment").text().as_string();
+        if(verticalAlignment == "Left")
+        {
+            mVerticalAlignment = VerticalAlignment::Top;
+        }
+        else if(verticalAlignment == "Right")
+        {
+            mVerticalAlignment = VerticalAlignment::Bottom;
+        }
+        else if(verticalAlignment == "Center")
+        {
+            mVerticalAlignment = VerticalAlignment::Center;
+        }
+        else if(verticalAlignment == "Stretch")
+        {
+            mVerticalAlignment = VerticalAlignment::Stretch;
+        }
+
+        auto children = node.child("Children");
+        for(auto it = children.begin(); it != children.end(); it++)
+        {
+            AddChild(DeserializeNode(*it));
+        }
+    }
+
     bool Object::IsInsideBounds(const float x, const float y)
     {
         auto left   = mPositionDimension.x;
@@ -351,13 +517,7 @@ namespace UI
 
     void Object::Update()
     {
-        const auto rootObjectIt = std::ranges::find_if(sObjects, [this](const ObjectSharedPtr& object) {
-            return object.get() == this;
-        });
-
-        const bool isRootObject = (rootObjectIt != std::end(sObjects));
-
-        if(mParent == nullptr && isRootObject == false)
+        if(mParent == nullptr && IsRootObject(this) == false)
         {
             return;
         }
@@ -418,17 +578,17 @@ namespace UI
         ImGui::PopID();
     }
 
-    void RemoveAllObjects() { sObjects.clear(); }
+    void RemoveAllObjects() { sRootObjects.clear(); }
 
-    void AddRootObject(const ObjectSharedPtr& object) { sObjects.emplace_back(std::move(object)); }
+    void AddRootObject(const ObjectSharedPtr& object) { sRootObjects.emplace_back(std::move(object)); }
 
     void DrawImguiObjectTreeDebugMenu(const bool forceExpand)
     {
-        for(const ObjectSharedPtr& child : sObjects)
+        for(const ObjectSharedPtr& rootObjects : sRootObjects)
         {
-            if(child)
+            if(rootObjects)
             {
-                child->DrawImguiObjectTreeDebugMenu(forceExpand);
+                rootObjects->DrawImguiObjectTreeDebugMenu(forceExpand);
             }
         }
 
@@ -449,11 +609,11 @@ namespace UI
 
     Object* FindObjectByPath(std::string_view path)
     {
-        for(const ObjectSharedPtr& object : sObjects)
+        for(const ObjectSharedPtr& rootObject : sRootObjects)
         {
-            if(object)
+            if(rootObject)
             {
-                if(Object* foundObject = object->FindObjectByPath(path))
+                if(Object* foundObject = rootObject->FindObjectByPath(path))
                 {
                     return foundObject;
                 }
@@ -462,8 +622,4 @@ namespace UI
 
         return nullptr;
     }
-
-    void SetViewportWidth(float const viewportWidth) { sViewportWidth = viewportWidth; }
-    void SetViewportHeight(float const viewportHeight) { sViewportHeight = viewportHeight; }
-
 } // namespace UI
