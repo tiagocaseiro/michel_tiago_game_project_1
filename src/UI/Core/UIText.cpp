@@ -31,16 +31,43 @@ namespace UI
         UpdateText();
     }
 
+    void Text::Initialize(const pugi::xml_node& node)
+    {
+        superclass::Initialize(node);
+        SetText(node.child("Text").text().as_string());
+        if(auto color = node.child("Color"))
+        {
+            SetColor(Common::StringToColor(color.text().as_string()));
+        }
+
+        if(auto fontPath = node.child("FontPath"))
+        {
+            SetFontPath(fontPath.text().as_string());
+        }
+
+        if(auto size = node.child("Size"))
+        {
+            SetSize(size.text().as_int());
+        }
+
+        if(auto text = node.child("Text"))
+        {
+            SetText(text.text().as_string());
+        }
+    }
+
     void Text::Update()
     {
-        superclass::Update();
-
         int w = 0;
         int h = 0;
         TTF_GetTextSize(mTextHandle.get(), &w, &h);
 
         SetWidth(w);
         SetHeight(h);
+
+        // Needs to happen after dimensions are set
+        // TODO: Make UpdatePosition virtual
+        superclass::Update();
     }
 
     void Text::UpdateText()

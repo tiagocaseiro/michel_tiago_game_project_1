@@ -1,0 +1,22 @@
+<StackPanel>
+    <Id>handPanel0</Id>
+    <Orientation>Horizontal</Orientation>
+    <Padding>20</Padding>
+    <VerticalAlignment>Top</VerticalAlignment>
+    <HorizontalAlignment>Center</HorizontalAlignment>
+</StackPanel>
+<StackPanel>
+    <Id>flagsPanel</Id>
+    <Orientation>Bottom</Orientation>
+    <Padding>10</Padding>
+    <VerticalAlignment>Center</VerticalAlignment>
+    <HorizontalAlignment>Center</HorizontalAlignment> 
+</StackPanel>
+<StackPanel>
+    <Id>handPanel1</Id>
+    <Orientation>Horizontal</Orientation>
+    <Padding>20</Padding>
+    <VerticalAlignment>Bottom</VerticalAlignment>
+    <HorizontalAlignment>Center</HorizontalAlignment> 
+</StackPanel>
+

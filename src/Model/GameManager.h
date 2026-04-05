@@ -5,10 +5,10 @@
 #include "Player.h"
 #include "TurnManager.h"
 
+#include "Actions/ActionManager.h"
 #include "Rules/FormationRules.h"
 #include "Rules/GameplayRules.h"
 #include "Rules/InitialSetup.h"
-#include "Actions/ActionManager.h"
 
 #include <string>
 
@@ -19,6 +19,8 @@ public:
                 const InitialSetup& initialSetup = {});
 
     void Save(const std::string& saveName = "autosave") const;
+
+    const Board& GetBoard() const { return mBoard; }
 
 private:
     void StartGame(const InitialSetup& initialSetup);

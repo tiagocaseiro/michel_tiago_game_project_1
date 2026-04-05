@@ -11,7 +11,7 @@ static std::unique_ptr<GameUI> sGameUI;
 
 void GameUIManager::Init()
 {
-    sGameUI = std::unique_ptr<PreBattleUI>(new PreBattleUI);
+    sGameUI = std::unique_ptr<GameUI>(new PreBattleUI);
     sGameUI->Init();
 }
 

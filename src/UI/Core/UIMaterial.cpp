@@ -1,5 +1,7 @@
 #include "UIMaterial.h"
 
+#include <pugixml.hpp>
+
 #include "imgui.h"
 
 #include "Common/Data.h"
@@ -7,7 +9,7 @@
 
 namespace UI
 {
-    void Material::SetImagePath(const std::string& texturePath)
+    void Material::SetTexturePath(const std::string& texturePath)
     {
         if(mTexturePath != texturePath)
         {
@@ -41,6 +43,20 @@ namespace UI
             ImGui::Text("Color");
             ImGui::SameLine();
             ImGui::ColorEdit4("Color", (float*)&mColor);
+        }
+    }
+
+    void Material::Initialize(const pugi::xml_node& node)
+    {
+        superclass::Initialize(node);
+        if(auto color = node.child("Color"))
+        {
+            SetColor(Common::StringToColor(color.text().as_string()));
+        }
+
+        if(auto texturePath = node.child("TexturePath"))
+        {
+            SetTexturePath(texturePath.text().as_string());
         }
     }
 } // namespace UI
