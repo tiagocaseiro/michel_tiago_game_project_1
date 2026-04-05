@@ -2,7 +2,6 @@
 
 #include "UI/Core/UIDeserializer.h"
 #include "UI/Core/UIMaterial.h"
-#include "UI/Core/UIStore.h"
 #include "UI/Core/UIText.h"
 
 void PreBattleUI::Init()
