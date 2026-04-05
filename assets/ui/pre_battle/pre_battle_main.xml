@@ -6,7 +6,7 @@
     <Children>
         <Text>
             <Id>gameTitle</Id>
-            <FontPath>fonts/canterbury.ttf</FontPath>
+            <FontPath>canterbury</FontPath>
             <Color>White</Color>
             <HorizontalAlignment>Center</HorizontalAlignment>
             <VerticalAlignment>Top</VerticalAlignment>
@@ -25,7 +25,7 @@
             <Children>
                 <Text>
                     <Id>startButtonLabel</Id>
-                    <FontPath>fonts/montserrat.ttf</FontPath>
+                    <FontPath>montserrat</FontPath>
                     <Color>White</Color>
                     <HorizontalAlignment>Center</HorizontalAlignment>
                     <VerticalAlignment>Center</VerticalAlignment>

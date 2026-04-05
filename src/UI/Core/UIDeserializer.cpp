@@ -33,12 +33,16 @@ namespace UI
         return {};
     }
 
-    std::vector<std::shared_ptr<Object>> DeserializeLayout(std::string_view filePath)
+    std::vector<std::shared_ptr<Object>> DeserializeLayout(const std::string& filePath)
     {
+        static const std::string s_uiFolder = "assets/ui/";
+
+        const std::string finalPath = s_uiFolder + filePath;
+
         std::vector<std::shared_ptr<Object>> rootObjects;
 
         pugi::xml_document doc;
-        pugi::xml_parse_result result = doc.load_file(filePath.data());
+        pugi::xml_parse_result result = doc.load_file(finalPath.data());
         if(result == false)
         {
             return rootObjects;

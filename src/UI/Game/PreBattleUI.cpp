@@ -6,7 +6,7 @@
 
 void PreBattleUI::Init()
 {
-    for(UI::ObjectSharedPtr rootObject : UI::DeserializeLayout("ui/pre_battle.xml"))
+    for(UI::ObjectSharedPtr rootObject : UI::DeserializeLayout("pre_battle/pre_battle_main.xml"))
     {
         UI::AddRootObject(rootObject);
     }

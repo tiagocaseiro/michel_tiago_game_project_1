@@ -14,9 +14,14 @@ std::unordered_map<std::string, std::unordered_map<int, FontUniquePtr>> sFonts;
 
 namespace Common
 {
-    TTF_Font* GetFont(const std::string& fontPath, const int size)
+
+    TTF_Font* GetFont(const std::string& fontId, const int size)
     {
-        std::unordered_map<int, FontUniquePtr>& fontMap = sFonts[fontPath];
+        static const std::string s_fontsFolder = "assets/fonts/";
+
+        const std::string fontPath = s_fontsFolder + fontId + ".ttf";
+
+        std::unordered_map<int, FontUniquePtr>& fontMap = sFonts[fontId];
 
         if(fontMap.contains(size))
         {
@@ -27,7 +32,7 @@ namespace Common
 
         if(font == nullptr)
         {
-            Logging::LogInfo("Failed to load font path {}", fontPath);
+            Logging::LogInfo("Failed to load font path {}", fontId);
             return nullptr;
         }
 
@@ -38,9 +43,9 @@ namespace Common
 
     void UnloadAllFonts() { sFonts.clear(); }
 
-    SDLTextUniquePtr CreateText(const std::string& fontPath, const int size, const std::string& text)
+    SDLTextUniquePtr CreateText(const std::string& fontId, const int size, const std::string& text)
     {
-        TTF_Text* sdlText = TTF_CreateText(GetTextRenderer(), GetFont(fontPath, size), text.c_str(), text.size());
+        TTF_Text* sdlText = TTF_CreateText(GetTextRenderer(), GetFont(fontId, size), text.c_str(), text.size());
 
         return SDLTextUniquePtr(sdlText, &TTF_DestroyText);
     }

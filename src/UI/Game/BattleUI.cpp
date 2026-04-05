@@ -11,7 +11,7 @@ static std::shared_ptr<UI::Material> MakeCardInstance(const Card& card)
     std::shared_ptr<UI::Material> cardInstance =
         UI::Material::Make("cardParent" + EnumUtil::ToString(card.mColour) + std::to_string(card.mPower));
 
-    cardInstance->SetWidth(50);
+    cardInstance->SetWidth(75);
     cardInstance->SetHeight(100);
     cardInstance->SetColor(EnumUtil::ToColor(card.mColour));
 
@@ -33,7 +33,7 @@ static std::shared_ptr<UI::Material> MakeFlagInstance(int index)
 
 void BattleUI::Init()
 {
-    for(UI::ObjectSharedPtr rootObject : UI::DeserializeLayout("ui/battle.xml"))
+    for(UI::ObjectSharedPtr rootObject : UI::DeserializeLayout("battle/battle_main.xml"))
     {
         UI::AddRootObject(rootObject);
     }
