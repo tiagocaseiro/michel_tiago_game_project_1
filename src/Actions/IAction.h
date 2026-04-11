@@ -5,9 +5,12 @@
 #include <nlohmann/json.hpp>
 
 class Board;
+enum class TurnPhase;
 
 struct IActionParameters
 {
+    IActionParameters(bool advancesTurn) : mAdvancesTurn(advancesTurn) {}
+    bool mAdvancesTurn;
 };
 
 class IAction
@@ -23,6 +26,7 @@ public:
 
     virtual ~IAction() = default;
 
+    virtual TurnPhase FollowingTurnPhase() const = 0;
     virtual std::string GetTypeName()       = 0;
     virtual std::string GetBlockers() const = 0;
     virtual void Apply()                    = 0;
@@ -30,6 +34,7 @@ public:
     virtual nlohmann::json ToJson() const   = 0;
 
     bool CanApply() const { return GetBlockers().empty(); }
+    bool AdvancesTurn() const { return mParams ? mParams->mAdvancesTurn : false; }
 
 protected:
     Board& mBoard;

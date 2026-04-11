@@ -2,10 +2,15 @@
 
 #include "ActionFactory.h"
 #include "Model/Board.h"
+#include "Model/TurnManager.h"
 
 #include "Tools/Logging.h"
 
-ActionManager::ActionManager(Board& board) : mBoard(board) {}
+ActionManager::ActionManager(Board& board, TurnManager& turnManager)
+    : mBoard(board),
+      mTurnManager(turnManager)
+{
+}
 
 void ActionManager::AddAction(std::unique_ptr<IAction> action, const bool immediateApply /*= true*/)
 {
@@ -20,10 +25,12 @@ void ActionManager::AddAction(std::unique_ptr<IAction> action, const bool immedi
     {
         if(mAppliedActionIndex != mAllActions.size() - 2)
         {
-             Logging::LogDebug("Trying to apply action, but model is not up-to-date");
+            Logging::LogDebug("Trying to apply action, but model is not up-to-date");
             return;
         }
-        mAllActions.back()->Apply();
+        auto& newAction = *mAllActions.back();
+        newAction.Apply();
+        mTurnManager.OnActionPlayed(newAction);
         ++mAppliedActionIndex;
     }
 }
@@ -34,9 +41,10 @@ void ActionManager::Scrub(const int numActions)
     int targetAppliedIndex  = mAppliedActionIndex + numActions;
     if(targetAppliedIndex < 0 || targetAppliedIndex >= totalActions)
     {
-        Logging::LogDebug("Model is on index {} out of {} actions total. Trying to scrub {} actions, which would put us at {}, "
-                  "which is not possible",
-                  mAppliedActionIndex, totalActions, numActions, targetAppliedIndex);
+        Logging::LogDebug(
+            "Model is on index {} out of {} actions total. Trying to scrub {} actions, which would put us at {}, "
+            "which is not possible",
+            mAppliedActionIndex, totalActions, numActions, targetAppliedIndex);
     }
     targetAppliedIndex = std::clamp(targetAppliedIndex, 0, totalActions);
 
@@ -45,14 +53,20 @@ void ActionManager::Scrub(const int numActions)
         while(mAppliedActionIndex < targetAppliedIndex)
         {
             ++mAppliedActionIndex;
-            mAllActions[mAppliedActionIndex]->Apply();
+            auto& newAction = *mAllActions[mAppliedActionIndex];
+            newAction.Apply();
+            mTurnManager.OnActionPlayed(newAction);
+
         }
     }
     else
     {
         while(mAppliedActionIndex > targetAppliedIndex)
         {
-            mAllActions[mAppliedActionIndex]->Undo();
+            auto& lastAction   = *mAllActions[mAppliedActionIndex];
+            auto* actionBefore = mAppliedActionIndex > 0 ? mAllActions[mAppliedActionIndex - 1].get() : nullptr;
+            lastAction.Undo();
+            mTurnManager.UndoAction(lastAction, actionBefore);
             --mAppliedActionIndex;
         }
     }

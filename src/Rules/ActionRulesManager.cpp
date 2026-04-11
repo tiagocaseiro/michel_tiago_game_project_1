@@ -1,5 +1,6 @@
 #include "ActionRulesManager.h"
 
+#include "../Model/TurnManager.h"
 #include "Actions/DrawCardsAction.h"
 #include "Model/TurnManager.h"
 #include "Actions/IAction.h"
@@ -8,11 +9,11 @@ std::vector<std::unique_ptr<IAction>> ValidActions::GenerateValidActions(Board& 
 {
     switch (currentTurn.GetTurnPhase())
     {
-        case ReplenishHand:
+        case TurnPhase::ReplenishHand:
             return GenerateDrawPhaseActions(board, currentTurn);
-        case PlayCard:
+        case TurnPhase::PlayCard:
             return GeneratePlayPhaseActions(board, currentTurn);
-        case ResolveTactic:
+        case TurnPhase::ResolveTactic:
             Logging::LogWarning("Tactics not yet implemented, we should not be in a tactics phase. #TODO");
             return {};
     }

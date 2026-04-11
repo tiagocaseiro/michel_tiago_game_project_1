@@ -31,8 +31,8 @@ private:
     Player mPlayer1;
     Player mPlayer2;
     Board mBoard;
-    ActionManager mActionManager;
     TurnManager mTurnManager;
+    ActionManager mActionManager;
 
     // #TODO: We could have the option to data-drive these
     FormationRules mFormationRules;

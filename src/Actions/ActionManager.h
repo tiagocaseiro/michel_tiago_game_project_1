@@ -8,12 +8,13 @@
 #include <unordered_map>
 #include <vector>
 
+class TurnManager;
 class Board;
 
 class ActionManager
 {
 public:
-    explicit ActionManager(Board& board);
+    ActionManager(Board& board, TurnManager& turnManager);
     ActionManager(ActionManager& other) = delete;
 
     void AddAction(std::unique_ptr<IAction> action, bool immediateApply = true);
@@ -43,6 +44,7 @@ public:
 
 private:
     Board& mBoard;
+    TurnManager& mTurnManager;
 
     std::vector<std::unique_ptr<IAction>> mAllActions;
     int mAppliedActionIndex{-1};

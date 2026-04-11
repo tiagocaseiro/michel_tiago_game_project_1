@@ -79,7 +79,7 @@
 	}
     bool DrawCardsAction::DrawOneCard(const DrawCardsActionParams& params)
 	{
-        return  MoveOneCard(params.mCardZone, params.mPlayer.mPlayerHand);
+        return MoveOneCard(params.mCardZone, params.mPlayer.mPlayerHand);
 	}
 
     bool DrawCardsAction::UndrawOneCard(const DrawCardsActionParams& params)

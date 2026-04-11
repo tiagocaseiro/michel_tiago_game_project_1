@@ -2,6 +2,7 @@
 
 #include "ActionFactory.h"
 #include "IAction.h"
+#include "Model/TurnManager.h"
 
 #include "Tools/TGUID.h"
 
@@ -14,8 +15,8 @@ struct Player;
 struct DrawCardsActionParams : public IActionParameters
 {
 public:
-    DrawCardsActionParams(CardZone& cardZone, Player& player, int numToDraw)
-        : mCardZone(cardZone), mPlayer(player), mNumToDraw(numToDraw)
+    DrawCardsActionParams(CardZone& cardZone, Player& player, int numToDraw, bool advancesTurn = true)
+        : IActionParameters(advancesTurn), mCardZone(cardZone), mPlayer(player), mNumToDraw(numToDraw)
     {
 
     }
@@ -23,6 +24,7 @@ public:
     CardZone& mCardZone;
     Player& mPlayer;
     int mNumToDraw;
+    bool mEndsTurn;
 };
 
 class DrawCardsAction : public AutoRegisterAction<DrawCardsAction>
@@ -30,7 +32,8 @@ class DrawCardsAction : public AutoRegisterAction<DrawCardsAction>
 public:
     DrawCardsAction(Board& board, std::unique_ptr<DrawCardsActionParams> params);
 
-    std::string GetBlockers() const  override;
+    TurnPhase FollowingTurnPhase() const override { return TurnPhase::ReplenishHand; }
+    std::string GetBlockers() const override;
     void Apply() override;
     void Undo() override;
     nlohmann::json ToJson() const override;
