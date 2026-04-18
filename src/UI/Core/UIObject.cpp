@@ -543,7 +543,7 @@ namespace UI
             treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
         }
 
-        const bool isOpen = ImGui::TreeNodeEx(mId.c_str(), treeNodeFlags);
+        const bool isOpen = ImGui::TreeNodeEx((mId + std::to_string(mGuid.ID())).c_str(), treeNodeFlags);
         ImGui::SameLine();
         if(ImGui::SmallButton("Details"))
         {

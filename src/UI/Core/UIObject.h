@@ -10,6 +10,7 @@
 #include "Common/Texture.h"
 
 #include "Tools/ImguiDebug.h"
+#include "Tools/TGUID.h"
 
 #define DECLARE_UI_ELEMENT_DERIVED(UIClassName, UIClassNameParent)                                                     \
 public:                                                                                                                \
@@ -131,6 +132,7 @@ namespace UI
 
         explicit Object(const std::string& id)
             : mId(id),
+              mGuid(TGUID<Object>::Generate()),
               mParent(nullptr),
               mPath(id),
               mPositionDimension{0.0f, 0.0f, 0.0f, 0.0f},
@@ -142,6 +144,7 @@ namespace UI
         }
 
         const std::string mId;
+        const TGUID<Object> mGuid;
 
         const Object* mParent;
 
