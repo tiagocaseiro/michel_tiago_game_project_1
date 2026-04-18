@@ -46,7 +46,7 @@ namespace UI
         pugi::xml_parse_result result = doc.load_file(finalPath.data());
         if(result == false)
         {
-            Logging::LogWarning("Failed to load layout file %s", finalPath);
+            Logging::LogWarning("Failed to load layout file {}: {}", finalPath, result.description());
             return rootObjects;
         }
 
