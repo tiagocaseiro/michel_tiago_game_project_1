@@ -132,7 +132,6 @@ namespace UI
 
         explicit Object(const std::string& id)
             : mId(id),
-              mGuid(TGUID<Object>::Generate()),
               mParent(nullptr),
               mPath(id),
               mPositionDimension{0.0f, 0.0f, 0.0f, 0.0f},
@@ -144,7 +143,7 @@ namespace UI
         }
 
         const std::string mId;
-        const TGUID<Object> mGuid;
+        const TGUID<Object> mGuid = TGUID<Object>::Generate();
 
         const Object* mParent;
 
