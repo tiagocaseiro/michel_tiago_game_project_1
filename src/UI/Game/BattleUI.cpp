@@ -32,9 +32,9 @@ void BattleUI::Init()
         UI::AddRootObject(rootObject);
     }
 
-    mPlayer1HandPanel = UI::FindObjectByPath<UI::StackPanel>("handPanel0");
-    mPlayer2HandPanel = UI::FindObjectByPath<UI::StackPanel>("handPanel1");
-    mFlagsPanel       = UI::FindObjectByPath<UI::StackPanel>("flagsPanel");
+    mPlayer1HandPanel = UI::FindObjectById<UI::StackPanel>("handPanel1");
+    mPlayer2HandPanel = UI::FindObjectById<UI::StackPanel>("handPanel2");
+    mFlagsPanel       = UI::FindObjectById<UI::StackPanel>("flagsPanel");
 }
 
 void InitializeHandCards(UI::StackPanel& handPanel, const Player& player)

@@ -294,7 +294,8 @@ namespace UI
                 float leftParentOffset = 0;
                 if(mParent != nullptr)
                 {
-                    leftParentOffset = mParent->mPositionDimension.y;
+                    leftParentOffset =
+                        mParent->mPositionDimension.y + mParent->mPositionDimension.h - mPositionDimension.h;
                 }
                 else
                 {
