@@ -4,6 +4,7 @@
 
 #include <pugixml.hpp>
 
+#include "Tools/Logging.h"
 #include "UI/Core/UIDeserializer.h"
 #include "UI/Core/UIMaterial.h"
 #include "UI/Core/UIObject.h"
@@ -45,6 +46,7 @@ namespace UI
         pugi::xml_parse_result result = doc.load_file(finalPath.data());
         if(result == false)
         {
+            Logging::LogWarning("Failed to load layout file %s", finalPath);
             return rootObjects;
         }
 
@@ -52,6 +54,7 @@ namespace UI
         {
             rootObjects.push_back(DeserializeNode(*it));
         }
+
         return rootObjects;
     }
 } // namespace UI

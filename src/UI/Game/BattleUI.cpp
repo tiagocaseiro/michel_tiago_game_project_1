@@ -8,27 +8,21 @@
 
 static std::shared_ptr<UI::Material> MakeCardInstance(const Card& card)
 {
-    std::shared_ptr<UI::Material> cardInstance =
-        UI::Material::Make("cardParent" + EnumUtil::ToString(card.mColour) + std::to_string(card.mPower));
+    std::shared_ptr<UI::Material> loadedTemplateMaterial =
+        UI::DeserializeObject<UI::Material>("battle/templates/battle_card_template.xml");
+    if(loadedTemplateMaterial == nullptr)
+    {
+        return {};
+    }
 
-    cardInstance->SetWidth(75);
-    cardInstance->SetHeight(100);
-    cardInstance->SetColor(EnumUtil::ToColor(card.mColour));
+    loadedTemplateMaterial->SetColor(EnumUtil::ToColor(card.mColour));
 
-    return cardInstance;
+    return loadedTemplateMaterial;
 }
 
-static std::shared_ptr<UI::Material> MakeFlagInstance(int index)
+static std::shared_ptr<UI::Object> MakeFlagInstance(int /*index*/)
 {
-    std::shared_ptr<UI::Material> flagInstance = UI::Material::Make("flag" + std::to_string(index));
-
-    flagInstance->SetColor({1, 0, 0, 1});
-    flagInstance->SetTopMargin(500);
-    flagInstance->SetWidth(50);
-    flagInstance->SetHeight(50);
-    flagInstance->SetVerticalAlignment(UI::VerticalAlignment::Center);
-
-    return flagInstance;
+    return UI::DeserializeObject("battle/templates/flag_template.xml");
 }
 
 void BattleUI::Init()
