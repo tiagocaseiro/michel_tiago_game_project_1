@@ -84,7 +84,7 @@ namespace UI
     public:
         Object(const Object&)            = delete;
         Object& operator=(const Object&) = delete;
-        virtual ~Object();
+        virtual ~Object()                = default;
 
         virtual void Draw() const = 0;
 
@@ -102,31 +102,25 @@ namespace UI
         void SetVerticalAlignment(VerticalAlignment const vAlignment) { mVerticalAlignment = vAlignment; }
         void SetParent(Object& parent);
 
-        const std::vector<std::shared_ptr<Object>>& Children() { return mChildren; }
-
         bool IsInsideBounds(const float x, const float y);
 
         virtual void Update();
 
+        virtual int GetImguiObjectTreeDebugNodeData(const bool forceExpand);
         virtual void DrawImguiObjectTreeDebugMenu(const bool forceExpand);
+        virtual void DrawImguiChildrenObjects(const bool opened) {}
         virtual void DrawImguiObjectDetailsDebugMenu();
 
-        void AddChild(const ObjectSharedPtr& object);
+        virtual ObjectSharedPtr FindObjectByPath(std::string_view path);
+        virtual ObjectSharedPtr FindObjectById(std::string_view id);
 
-        ObjectSharedPtr FindObjectByPath(std::string_view path);
+        virtual void UpdatePath();
 
     protected:
         bool GetVisibility() const { return mVisible; }
 
-        void UpdatePath();
-        void RemoveChild(std::string_view childId);
-        void RemoveChild(int childIndex);
-        void RemoveAllChildren();
-
         void UpdateDimensions();
         void UpdatePosition();
-
-        void DrawChildren() const;
 
         void Initialize(const pugi::xml_node& node);
 
@@ -155,8 +149,6 @@ namespace UI
         HorizontalAlignment mHorizontalAlignment;
         VerticalAlignment mVerticalAlignment;
 
-        std::vector<ObjectSharedPtr> mChildren;
-
         bool mVisible;
 
         friend void DrawDebug();
@@ -171,8 +163,15 @@ namespace UI
     template <typename T>
     std::shared_ptr<T> FindObjectByPath(std::string_view path)
     {
-        ObjectSharedPtr foundObject = FindObjectByPath(path);
-        return std::dynamic_pointer_cast<T>(foundObject);
+        return std::dynamic_pointer_cast<T>(FindObjectByPath(path));
+    }
+
+    ObjectSharedPtr FindObjectById(std::string_view id);
+
+    template <typename T>
+    std::shared_ptr<T> FindObjectById(std::string_view id)
+    {
+        return std::dynamic_pointer_cast<T>(FindObjectById(id));
     }
 
     HorizontalAlignment StringToHorizontalAlignmentEnum(const std::string& horizontalAlignment);

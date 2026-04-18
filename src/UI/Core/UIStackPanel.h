@@ -1,12 +1,12 @@
 #pragma once
 
-#include "UIObject.h"
+#include "UIPanel.h"
 
 namespace UI
 {
-    class StackPanel : public Object
+    class StackPanel : public Panel
     {
-        DECLARE_UI_ELEMENT(StackPanel);
+        DECLARE_UI_ELEMENT_DERIVED(StackPanel, Panel);
 
     public:
         enum class Orientation
@@ -21,7 +21,6 @@ namespace UI
 
     protected:
         void Update() override;
-        void Draw() const override;
 
     private:
         void VerticalUpdate();

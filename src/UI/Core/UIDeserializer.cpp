@@ -21,6 +21,11 @@ namespace UI
             return object;
         }
 
+        if(auto object = Panel::Make(node))
+        {
+            return object;
+        }
+
         if(auto object = Material::Make(node))
         {
             return object;

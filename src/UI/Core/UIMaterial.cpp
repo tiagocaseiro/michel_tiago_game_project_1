@@ -26,7 +26,6 @@ namespace UI
             SDL_RenderTexture(renderer, mTextureHandle.get(), nullptr, &mPositionDimension);
             SDL_SetRenderDrawColorFloat(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
             SDL_RenderFillRect(renderer, &mPositionDimension);
-            DrawChildren();
         }
     }
 

@@ -11,8 +11,8 @@ void PreBattleUI::Init()
         UI::AddRootObject(rootObject);
     }
 
-    mStartButtonPanel = UI::FindObjectByPath<UI::Material>("preBattleBackground.startButtonBackground");
-    mStartButtonLabel = UI::FindObjectByPath<UI::Text>("preBattleBackground.startButtonBackground.startButtonLabel");
+    mStartButtonPanel = UI::FindObjectById<UI::Material>("startButtonBackground");
+    mStartButtonLabel = UI::FindObjectById<UI::Text>("startButtonLabel");
 }
 
 void PreBattleUI::Update(const GameManager& model) {}

@@ -39,17 +39,6 @@ namespace UI
         }
     }
 
-    void StackPanel::Draw() const
-    {
-        for(ObjectSharedPtr child : mChildren)
-        {
-            if(child)
-            {
-                child->Draw();
-            }
-        }
-    }
-
     void StackPanel::VerticalUpdate() {}
 
     void StackPanel::HorizontalUpdate()
