@@ -15,6 +15,7 @@ GameManager::GameManager(const FormationRules& formationRules, const GameplayRul
 {
     StartGame(initialSetup);
 }
+
 void GameManager::Save(const std::string& saveName) const
 {
     nlohmann::json saveData = mBoard.ToJson();
@@ -28,6 +29,7 @@ void GameManager::StartGame(const InitialSetup& initialSetup)
     DistributeInitialCards(initialSetup, mPlayer1);
     DistributeInitialCards(initialSetup, mPlayer2);
 }
+
 void GameManager::DistributeInitialCards(const InitialSetup& initialSetup, Player& player)
 {
     auto actionParams = std::make_unique<DrawCardsActionParams>(mBoard.mTroopDeck, player, initialSetup.mInitialCardsPerPlayer);
