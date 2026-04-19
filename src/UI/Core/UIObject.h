@@ -51,7 +51,8 @@ namespace UI
         Left,
         Right,
         Center,
-        Stretch
+        Stretch,
+        None
     };
 
     enum class VerticalAlignment
@@ -59,7 +60,8 @@ namespace UI
         Top,
         Bottom,
         Center,
-        Stretch
+        Stretch,
+        None
     };
 
     struct Margin
@@ -176,5 +178,4 @@ namespace UI
 
     HorizontalAlignment StringToHorizontalAlignmentEnum(const std::string& horizontalAlignment);
     VerticalAlignment StringToVerticalAlignmentEnum(const std::string& verticalAlignment);
-
 } // namespace UI

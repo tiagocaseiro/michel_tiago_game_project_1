@@ -6,16 +6,20 @@
 #include "UI/Core/UIStackPanel.h"
 #include "UI/Core/UIText.h"
 
-static std::shared_ptr<UI::Material> MakeCardInstance(const Card& card)
+static std::shared_ptr<UI::Panel> MakeCardInstance(const Card& card)
 {
-    std::shared_ptr<UI::Material> loadedTemplateMaterial =
-        UI::DeserializeObject<UI::Material>("battle/templates/battle_card_template.xml");
+    std::shared_ptr<UI::Panel> loadedTemplateMaterial =
+        UI::DeserializeObject<UI::Panel>("battle/templates/battle_card_template.xml");
     if(loadedTemplateMaterial == nullptr)
     {
         return {};
     }
 
-    loadedTemplateMaterial->SetColor(EnumUtil::ToColor(card.mColour));
+    if(std::shared_ptr<UI::Material> cardBackground =
+           loadedTemplateMaterial->FindObjectById<UI::Material>("cardBackground"))
+    {
+        cardBackground->SetColor(EnumUtil::ToColor(card.mColour));
+    }
 
     return loadedTemplateMaterial;
 }
@@ -38,17 +42,19 @@ void BattleUI::Init()
 
     if(std::shared_ptr<UI::Panel> troopsDrawPileParent = UI::FindObjectById<UI::Panel>("troopsDrawPileParent"))
     {
-        if(std::shared_ptr<UI::Material> cardParent = troopsDrawPileParent->FindObjectById<UI::Material>("cardParent"))
+        if(std::shared_ptr<UI::Material> cardBackground =
+               troopsDrawPileParent->FindObjectById<UI::Material>("cardBackground"))
         {
-            cardParent->SetColor(Common::Color::Black);
+            cardBackground->SetColor(Common::Color::Black);
         }
     }
 
     if(std::shared_ptr<UI::Panel> tacticsDrawPileParent = UI::FindObjectById<UI::Panel>("tacticsDrawPileParent"))
     {
-        if(std::shared_ptr<UI::Material> cardParent = tacticsDrawPileParent->FindObjectById<UI::Material>("cardParent"))
+        if(std::shared_ptr<UI::Material> cardBackground =
+               tacticsDrawPileParent->FindObjectById<UI::Material>("cardBackground"))
         {
-            cardParent->SetColor(Common::Color::Black);
+            cardBackground->SetColor(Common::Color::Black);
         }
     }
 }

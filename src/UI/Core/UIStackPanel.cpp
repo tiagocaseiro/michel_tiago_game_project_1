@@ -55,6 +55,7 @@ namespace UI
 
             if(child)
             {
+                child->SetHorizontalAlignment(HorizontalAlignment::None);
                 child->mPositionDimension.x = startX;
                 startX += child->mPositionDimension.w;
                 maxChildHeight = std::max(maxChildHeight, child->mPositionDimension.h);

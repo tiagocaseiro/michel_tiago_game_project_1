@@ -1,5 +1,20 @@
-<Material>
+<Panel>
     <Id>cardParent</Id>
-    <Width>75</Width>
-    <Height>100</Height>
-</Material>
+    <Width>80</Width>
+    <Height>105</Height>
+    <Children>
+        <Material>
+            <Id>cardHighlight</Id>
+            <Color>Red</Color>
+            <HorizontalAlignment>Stretch</HorizontalAlignment>
+            <VerticalAlignment>Stretch</VerticalAlignment>
+        </Material>
+        <Material>
+            <Id>cardBackground</Id>
+            <Width>75</Width>
+            <Height>100</Height>
+            <HorizontalAlignment>Center</HorizontalAlignment>
+            <VerticalAlignment>Center</VerticalAlignment>
+        </Material>
+    </Children>
+</Panel>
