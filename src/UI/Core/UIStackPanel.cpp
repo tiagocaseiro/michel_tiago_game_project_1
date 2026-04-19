@@ -39,17 +39,6 @@ namespace UI
         }
     }
 
-    void StackPanel::Draw() const
-    {
-        for(ObjectSharedPtr child : mChildren)
-        {
-            if(child)
-            {
-                child->Draw();
-            }
-        }
-    }
-
     void StackPanel::VerticalUpdate() {}
 
     void StackPanel::HorizontalUpdate()
@@ -66,6 +55,7 @@ namespace UI
 
             if(child)
             {
+                child->SetHorizontalAlignment(HorizontalAlignment::None);
                 child->mPositionDimension.x = startX;
                 startX += child->mPositionDimension.w;
                 maxChildHeight = std::max(maxChildHeight, child->mPositionDimension.h);

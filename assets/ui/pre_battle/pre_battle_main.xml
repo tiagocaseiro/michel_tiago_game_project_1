@@ -1,39 +1,49 @@
-<Material>
-    <Id>preBattleBackground</Id>
+<Panel>
+    <Id>mainPanel</Id>
     <VerticalAlignment>Stretch</VerticalAlignment>
     <HorizontalAlignment>Stretch</HorizontalAlignment>
-    <TexturePath>textures/preBattleBackground.png</TexturePath>
     <Children>
+        <Material>
+            <Id>preBattleBackground</Id>
+            <VerticalAlignment>Stretch</VerticalAlignment>
+            <HorizontalAlignment>Stretch</HorizontalAlignment>
+            <TexturePath>textures/preBattleBackground.png</TexturePath>
+        </Material>
         <Text>
             <Id>gameTitle</Id>
-            <FontPath>fonts/canterbury.ttf</FontPath>
+            <FontPath>canterbury</FontPath>
             <Color>White</Color>
             <HorizontalAlignment>Center</HorizontalAlignment>
             <VerticalAlignment>Top</VerticalAlignment>
             <MarginTop>300</MarginTop>
             <Text>Battle Line</Text>
             <Size>150</Size>
-        </Text>
-        <Material>
-            <Id>startButtonBackground</Id>
-            <Color>Black</Color>
-            <Width>200</Width>
-            <Height>60</Height>
+        </Text> 
+        <Panel>
+            <Id>buttonPanel</Id>
             <MarginTop>500</MarginTop>
             <VerticalAlignment>Top</VerticalAlignment>
             <HorizontalAlignment>Center</HorizontalAlignment>
             <Children>
+                <Material>
+                    <Id>startButtonBackground</Id>
+                    <Color>Black</Color>
+                    <Width>200</Width>
+                    <Height>60</Height>
+                    <HorizontalAlignment>Center</HorizontalAlignment>
+                    <VerticalAlignment>Center</VerticalAlignment>
+                </Material>
                 <Text>
                     <Id>startButtonLabel</Id>
-                    <FontPath>fonts/montserrat.ttf</FontPath>
+                    <FontPath>montserrat</FontPath>
                     <Color>White</Color>
                     <HorizontalAlignment>Center</HorizontalAlignment>
                     <VerticalAlignment>Center</VerticalAlignment>
                     <Text>Start Game</Text>
                     <Size>30</Size>
                 </Text>
-            </Children>     
-        </Material>
+            </Children>
+        </Panel>            
     </Children>     
-</Material>
+</Panel>
 

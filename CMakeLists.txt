@@ -44,17 +44,5 @@ target_link_libraries(michel-tiago-game-project-1 PRIVATE pugixml)
 add_custom_command(
         TARGET michel-tiago-game-project-1 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_SOURCE_DIR}/textures
-                $<TARGET_FILE_DIR:michel-tiago-game-project-1>/textures)
-
-add_custom_command(
-        TARGET michel-tiago-game-project-1 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_SOURCE_DIR}/fonts
-                $<TARGET_FILE_DIR:michel-tiago-game-project-1>/fonts)
-
-add_custom_command(
-        TARGET michel-tiago-game-project-1 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_SOURCE_DIR}/ui
-                $<TARGET_FILE_DIR:michel-tiago-game-project-1>/ui)
+                ${CMAKE_SOURCE_DIR}/assets
+                $<TARGET_FILE_DIR:michel-tiago-game-project-1>/assets)

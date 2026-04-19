@@ -1,0 +1,6 @@
+<Material>
+    <Id>flag</Id>
+    <Width>50</Width>
+    <Height>50</Height>
+    <Color>Red</Color>
+</Material>

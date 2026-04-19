@@ -4,10 +4,12 @@
 
 #include <pugixml.hpp>
 
+#include "Tools/Logging.h"
 #include "UI/Core/UIDeserializer.h"
 #include "UI/Core/UIMaterial.h"
 #include "UI/Core/UIObject.h"
 #include "UI/Core/UIStackPanel.h"
+#include "UI/Core/UITemplate.h"
 #include "UI/Core/UIText.h"
 
 namespace UI
@@ -15,7 +17,18 @@ namespace UI
 
     std::shared_ptr<Object> DeserializeNode(const pugi::xml_node& node)
     {
+
+        if(auto object = Template::Make(node))
+        {
+            return object;
+        }
+
         if(auto object = StackPanel::Make(node))
+        {
+            return object;
+        }
+
+        if(auto object = Panel::Make(node))
         {
             return object;
         }
@@ -33,14 +46,19 @@ namespace UI
         return {};
     }
 
-    std::vector<std::shared_ptr<Object>> DeserializeLayout(std::string_view filePath)
+    std::vector<std::shared_ptr<Object>> DeserializeLayout(const std::string& filePath)
     {
+        static const std::string s_uiFolder = "assets/ui/";
+
+        const std::string finalPath = s_uiFolder + filePath;
+
         std::vector<std::shared_ptr<Object>> rootObjects;
 
         pugi::xml_document doc;
-        pugi::xml_parse_result result = doc.load_file(filePath.data());
+        pugi::xml_parse_result result = doc.load_file(finalPath.data());
         if(result == false)
         {
+            Logging::LogWarning("Failed to load layout file {}: {}", finalPath, result.description());
             return rootObjects;
         }
 
@@ -48,6 +66,7 @@ namespace UI
         {
             rootObjects.push_back(DeserializeNode(*it));
         }
+
         return rootObjects;
     }
 } // namespace UI

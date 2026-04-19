@@ -6,41 +6,57 @@
 #include "UI/Core/UIStackPanel.h"
 #include "UI/Core/UIText.h"
 
-static std::shared_ptr<UI::Material> MakeCardInstance(const Card& card)
+static std::shared_ptr<UI::Panel> MakeCardInstance(const Card& card)
 {
-    std::shared_ptr<UI::Material> cardInstance =
-        UI::Material::Make("cardParent" + EnumUtil::ToString(card.mColour) + std::to_string(card.mPower));
+    std::shared_ptr<UI::Panel> loadedTemplateMaterial =
+        UI::DeserializeObject<UI::Panel>("battle/templates/battle_card_template.xml");
+    if(loadedTemplateMaterial == nullptr)
+    {
+        return {};
+    }
 
-    cardInstance->SetWidth(50);
-    cardInstance->SetHeight(100);
-    cardInstance->SetColor(EnumUtil::ToColor(card.mColour));
+    if(std::shared_ptr<UI::Material> cardBackground =
+           loadedTemplateMaterial->FindObjectById<UI::Material>("cardBackground"))
+    {
+        cardBackground->SetColor(EnumUtil::ToColor(card.mColour));
+    }
 
-    return cardInstance;
+    return loadedTemplateMaterial;
 }
 
-static std::shared_ptr<UI::Material> MakeFlagInstance(int index)
+static std::shared_ptr<UI::Object> MakeFlagInstance(int /*index*/)
 {
-    std::shared_ptr<UI::Material> flagInstance = UI::Material::Make("flag" + std::to_string(index));
-
-    flagInstance->SetColor({1, 0, 0, 1});
-    flagInstance->SetTopMargin(500);
-    flagInstance->SetWidth(50);
-    flagInstance->SetHeight(50);
-    flagInstance->SetVerticalAlignment(UI::VerticalAlignment::Center);
-
-    return flagInstance;
+    return UI::DeserializeObject("battle/templates/flag_template.xml");
 }
 
 void BattleUI::Init()
 {
-    for(UI::ObjectSharedPtr rootObject : UI::DeserializeLayout("ui/battle.xml"))
+    for(UI::ObjectSharedPtr rootObject : UI::DeserializeLayout("battle/battle_main.xml"))
     {
         UI::AddRootObject(rootObject);
     }
 
-    mPlayer1HandPanel = UI::FindObjectByPath<UI::StackPanel>("handPanel0");
-    mPlayer2HandPanel = UI::FindObjectByPath<UI::StackPanel>("handPanel1");
-    mFlagsPanel       = UI::FindObjectByPath<UI::StackPanel>("flagsPanel");
+    mPlayer1HandPanel = UI::FindObjectById<UI::StackPanel>("handPanel1");
+    mPlayer2HandPanel = UI::FindObjectById<UI::StackPanel>("handPanel2");
+    mFlagsPanel       = UI::FindObjectById<UI::StackPanel>("flagsPanel");
+
+    if(std::shared_ptr<UI::Panel> troopsDrawPileParent = UI::FindObjectById<UI::Panel>("troopsDrawPileParent"))
+    {
+        if(std::shared_ptr<UI::Material> cardBackground =
+               troopsDrawPileParent->FindObjectById<UI::Material>("cardBackground"))
+        {
+            cardBackground->SetColor(Common::Color::Black);
+        }
+    }
+
+    if(std::shared_ptr<UI::Panel> tacticsDrawPileParent = UI::FindObjectById<UI::Panel>("tacticsDrawPileParent"))
+    {
+        if(std::shared_ptr<UI::Material> cardBackground =
+               tacticsDrawPileParent->FindObjectById<UI::Material>("cardBackground"))
+        {
+            cardBackground->SetColor(Common::Color::Black);
+        }
+    }
 }
 
 void InitializeHandCards(UI::StackPanel& handPanel, const Player& player)

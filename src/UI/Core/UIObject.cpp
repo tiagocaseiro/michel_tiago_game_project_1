@@ -1,23 +1,18 @@
 #include "UIObject.h"
 
-#include <algorithm>
-
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "imgui.h"
 
 #include "Common/Data.h"
 #include "Tools/Logging.h"
-#include "UI/Core/UIDeserializer.h"
 
 struct SDL_Renderer;
 
 namespace UI
 {
-    static constexpr auto sPathSeparator = '.';
-
-    static Object* sSelectedObjectDetails = nullptr;
-    static bool sDetailsWindowOpen        = false;
+    static std::weak_ptr<Object> sSelectedObjectDetails;
+    static bool sDetailsWindowOpen = false;
 
     static float sViewportWidth  = 1.0f;
     static float sViewportHeight = 1.0f;
@@ -66,7 +61,7 @@ namespace UI
 
     void DrawDebug()
     {
-        if(sSelectedObjectDetails)
+        if(auto selectedObjectDetails = sSelectedObjectDetails.lock())
         {
             using namespace std::chrono_literals;
             constexpr static float sOneSecondInNanoseconds = (std::chrono::nanoseconds(1s)).count();
@@ -97,24 +92,16 @@ namespace UI
             SDL_Renderer* renderer = Common::GetRenderer();
 
             SDL_SetRenderDrawColorFloat(renderer, ratio, ratio, ratio, ratio);
-            SDL_RenderRect(renderer, &sSelectedObjectDetails->mPositionDimension);
-            SDL_RenderLine(renderer, sSelectedObjectDetails->mPositionDimension.x,
-                           sSelectedObjectDetails->mPositionDimension.y,
-                           sSelectedObjectDetails->mPositionDimension.x + sSelectedObjectDetails->mPositionDimension.w,
-                           sSelectedObjectDetails->mPositionDimension.y + sSelectedObjectDetails->mPositionDimension.h);
-            SDL_RenderLine(renderer,
-                           sSelectedObjectDetails->mPositionDimension.x + sSelectedObjectDetails->mPositionDimension.w,
-                           sSelectedObjectDetails->mPositionDimension.y, sSelectedObjectDetails->mPositionDimension.x,
-                           sSelectedObjectDetails->mPositionDimension.y + sSelectedObjectDetails->mPositionDimension.h);
-        }
-    }
 
-    Object::~Object()
-    {
-        if(sSelectedObjectDetails == this)
-        {
-            sSelectedObjectDetails = nullptr;
-            sDetailsWindowOpen     = false;
+            SDL_RenderRect(renderer, &selectedObjectDetails->mPositionDimension);
+            SDL_RenderLine(renderer, selectedObjectDetails->mPositionDimension.x,
+                           selectedObjectDetails->mPositionDimension.y,
+                           selectedObjectDetails->mPositionDimension.x + selectedObjectDetails->mPositionDimension.w,
+                           selectedObjectDetails->mPositionDimension.y + selectedObjectDetails->mPositionDimension.h);
+            SDL_RenderLine(renderer,
+                           selectedObjectDetails->mPositionDimension.x + selectedObjectDetails->mPositionDimension.w,
+                           selectedObjectDetails->mPositionDimension.y, selectedObjectDetails->mPositionDimension.x,
+                           selectedObjectDetails->mPositionDimension.y + selectedObjectDetails->mPositionDimension.h);
         }
     }
 
@@ -179,7 +166,7 @@ namespace UI
             }
             ImGui::Unindent();
 
-            ImGui::Text("Vertical Alignment");
+            ImGui::Text("Horizontal Alignment");
             ImGui::Indent();
             switch(mHorizontalAlignment)
             {
@@ -201,49 +188,6 @@ namespace UI
             ImGui::Unindent();
         }
     }
-
-    void Object::AddChild(const ObjectSharedPtr& object)
-    {
-        if(object == nullptr)
-        {
-            Logging::LogWarning("Attempted to attach an empty UI Object child");
-            return;
-        }
-        object->SetParent(*this);
-        mChildren.emplace_back(object);
-    }
-
-    void Object::RemoveChild(std::string_view childId)
-    {
-        const auto found = std::ranges::find_if(mChildren, [childId](const auto& child) {
-            return child && child->mId == childId;
-        });
-
-        if(found == std::end(mChildren))
-        {
-            Logging::LogWarning("Failed to find child object with id {} in object {}", childId, mPath);
-            return;
-        }
-
-        mChildren.erase(found);
-    }
-
-    void Object::RemoveChild(int childIndex)
-    {
-        if(childIndex >= mChildren.size())
-        {
-            Logging::LogWarning("Attempted to remove child with index {} beyond size of {} in object {}", childIndex,
-                                mChildren.size(), mPath);
-            return;
-        }
-
-        auto it = std::begin(mChildren);
-
-        std::advance(it, childIndex);
-        mChildren.erase(it);
-    }
-
-    void Object::RemoveAllChildren() { mChildren.clear(); }
 
     void Object::UpdateDimensions()
     {
@@ -294,16 +238,24 @@ namespace UI
         {
             case HorizontalAlignment::Left:
             {
-                float leftParentOffset = 0;
-                if(mParent != 0)
+                float parentOffset = 0;
+                if(mParent)
                 {
-                    leftParentOffset = mParent->mPositionDimension.x;
+                    parentOffset = mParent->mPositionDimension.x;
                 }
-                mPositionDimension.x = leftParentOffset + mMargin.left;
+                mPositionDimension.x = parentOffset + mMargin.left;
                 break;
             }
             case HorizontalAlignment::Right:
+            {
+                float parentOffset = 0;
+                if(mParent)
+                {
+                    parentOffset = mParent->mPositionDimension.x + mParent->mPositionDimension.w - mPositionDimension.w;
+                }
+                mPositionDimension.x = parentOffset - mMargin.right;
                 break;
+            }
             case HorizontalAlignment::Center:
             {
                 if(mParent != nullptr)
@@ -350,7 +302,8 @@ namespace UI
                 float leftParentOffset = 0;
                 if(mParent != nullptr)
                 {
-                    leftParentOffset = mParent->mPositionDimension.y;
+                    leftParentOffset =
+                        mParent->mPositionDimension.y + mParent->mPositionDimension.h - mPositionDimension.h;
                 }
                 else
                 {
@@ -398,37 +351,17 @@ namespace UI
             return shared_from_this();
         }
 
-        // This can be more efficient by storing a path object
-        // It's hella heavy to do all this string manipulation every time we search a path
-        // Also we don't want to depend on '.'
-        const auto frontSeparatorIndex = path.find_first_of(sPathSeparator);
-        const auto frontId             = path.substr(0, frontSeparatorIndex);
-
-        if(frontId == mId)
-        {
-            const auto rest = path.substr(frontSeparatorIndex + 1);
-
-            for(const ObjectSharedPtr& object : mChildren)
-            {
-                if(object)
-                {
-                    if(ObjectSharedPtr foundObject = object->FindObjectByPath(rest))
-                    {
-                        return foundObject;
-                    }
-                }
-            }
-        }
-
         return nullptr;
     }
 
-    void Object::DrawChildren() const
+    ObjectSharedPtr Object::FindObjectById(std::string_view id)
     {
-        for(const ObjectSharedPtr& child : mChildren)
+        if(id == mId)
         {
-            child->Draw();
+            return shared_from_this();
         }
+
+        return nullptr;
     }
 
     void Object::SetParent(Object& parent)
@@ -479,12 +412,9 @@ namespace UI
             mVerticalAlignment = StringToVerticalAlignmentEnum(verticalAlignment.text().as_string());
         }
 
-        if(auto children = node.child("Children"))
+        if(auto visible = node.child("Visible"))
         {
-            for(auto it = children.begin(); it != children.end(); it++)
-            {
-                AddChild(DeserializeNode(*it));
-            }
+            mVisible = visible.text().as_bool();
         }
     }
 
@@ -501,17 +431,11 @@ namespace UI
     {
         if(mParent)
         {
-            mPath = mParent->mPath + "." + mPath;
-        }
-
-        for(auto& children : mChildren)
-        {
-            if(children)
-            {
-                children->UpdatePath();
-            }
+            mPath = mParent->mPath + "." + mId;
         }
     }
+
+    int Object::GetImguiObjectTreeDebugNodeData(const bool forceExpand) { return ImGuiTreeNodeFlags_Leaf; }
 
     void Object::Update()
     {
@@ -522,55 +446,38 @@ namespace UI
 
         UpdateDimensions();
         UpdatePosition();
-
-        for(const ObjectSharedPtr& child : mChildren)
-        {
-            child->Update();
-        }
     }
 
     void Object::DrawImguiObjectTreeDebugMenu(const bool forceExpand)
     {
         ImGui::PushID(mId.c_str());
 
-        auto treeNodeFlags = ImGuiTreeNodeFlags_None;
-        if(mChildren.empty())
-        {
-            treeNodeFlags = ImGuiTreeNodeFlags_Leaf;
-        }
-        else if(forceExpand)
-        {
-            treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
-        }
-
-        const bool isOpen = ImGui::TreeNodeEx(mId.c_str(), treeNodeFlags);
+        const bool isOpen = ImGui::TreeNodeEx((mId + "##" + std::to_string(mGuid.ID())).c_str(),
+                                              GetImguiObjectTreeDebugNodeData(forceExpand));
         ImGui::SameLine();
         if(ImGui::SmallButton("Details"))
         {
-            if(sSelectedObjectDetails != nullptr)
+            if(auto selectedObjectDetails = sSelectedObjectDetails.lock())
             {
-                if(sSelectedObjectDetails == this)
+                if(selectedObjectDetails.get() == this)
                 {
-                    sSelectedObjectDetails = nullptr;
+                    sSelectedObjectDetails.reset();
                 }
                 else
                 {
-                    sSelectedObjectDetails = this;
+                    sSelectedObjectDetails = shared_from_this();
                 }
             }
             else
             {
-                sSelectedObjectDetails = this;
+                sSelectedObjectDetails = shared_from_this();
             }
 
-            sDetailsWindowOpen = sSelectedObjectDetails != nullptr;
+            sDetailsWindowOpen = sSelectedObjectDetails.expired() == false;
         }
         if(isOpen)
         {
-            for(const ObjectSharedPtr& child : mChildren)
-            {
-                child->DrawImguiObjectTreeDebugMenu(forceExpand);
-            }
+            DrawImguiChildrenObjects(forceExpand);
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -592,16 +499,16 @@ namespace UI
 
         if(sDetailsWindowOpen)
         {
-            if(sSelectedObjectDetails != nullptr)
+            if(auto selectedObjectDetails = sSelectedObjectDetails.lock())
             {
                 ImGui::Begin("UI Object Details", &sDetailsWindowOpen);
-                sSelectedObjectDetails->DrawImguiObjectDetailsDebugMenu();
+                selectedObjectDetails->DrawImguiObjectDetailsDebugMenu();
                 ImGui::End();
             }
         }
         else
         {
-            sSelectedObjectDetails = nullptr;
+            sSelectedObjectDetails.reset();
         }
     }
 
@@ -612,6 +519,22 @@ namespace UI
             if(rootObject)
             {
                 if(ObjectSharedPtr foundObject = rootObject->FindObjectByPath(path))
+                {
+                    return foundObject;
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
+    ObjectSharedPtr FindObjectById(std::string_view id)
+    {
+        for(const ObjectSharedPtr& rootObject : sRootObjects)
+        {
+            if(rootObject)
+            {
+                if(ObjectSharedPtr foundObject = rootObject->FindObjectById(id))
                 {
                     return foundObject;
                 }
