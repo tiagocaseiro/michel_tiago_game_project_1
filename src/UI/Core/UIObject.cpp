@@ -411,6 +411,11 @@ namespace UI
         {
             mVerticalAlignment = StringToVerticalAlignmentEnum(verticalAlignment.text().as_string());
         }
+
+        if(auto visible = node.child("Visible"))
+        {
+            mVisible = visible.text().as_bool();
+        }
     }
 
     bool Object::IsInsideBounds(const float x, const float y)

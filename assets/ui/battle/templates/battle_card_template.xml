@@ -8,6 +8,7 @@
             <Color>Red</Color>
             <HorizontalAlignment>Stretch</HorizontalAlignment>
             <VerticalAlignment>Stretch</VerticalAlignment>
+            <Visible>False</Visible>
         </Material>
         <Material>
             <Id>cardBackground</Id>
