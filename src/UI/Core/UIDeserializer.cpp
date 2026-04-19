@@ -9,6 +9,7 @@
 #include "UI/Core/UIMaterial.h"
 #include "UI/Core/UIObject.h"
 #include "UI/Core/UIStackPanel.h"
+#include "UI/Core/UITemplate.h"
 #include "UI/Core/UIText.h"
 
 namespace UI
@@ -16,6 +17,12 @@ namespace UI
 
     std::shared_ptr<Object> DeserializeNode(const pugi::xml_node& node)
     {
+
+        if(auto object = Template::Make(node))
+        {
+            return object;
+        }
+
         if(auto object = StackPanel::Make(node))
         {
             return object;

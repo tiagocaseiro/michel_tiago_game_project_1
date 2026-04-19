@@ -16,7 +16,7 @@ namespace UI
 
     std::vector<std::shared_ptr<Object>> DeserializeLayout(const std::string& filePath);
     std::shared_ptr<UI::Object> DeserializeNode(const pugi::xml_node& node);
-    template <typename T = UI::Object>
+    template <typename T = Object>
     std::shared_ptr<T> DeserializeObject(const std::string& filePath)
     {
         std::vector<std::shared_ptr<UI::Object>> loadedTemplateObjects = UI::DeserializeLayout(filePath);
@@ -25,7 +25,15 @@ namespace UI
             return {};
         }
 
-        return std::dynamic_pointer_cast<T>(loadedTemplateObjects.front());
+        if constexpr(std::is_same_v<T, Object>)
+        {
+            return loadedTemplateObjects.front();
+        }
+        else
+        {
+            return std::dynamic_pointer_cast<T>(loadedTemplateObjects.front());
+        }
+        return {};
     }
 
 } // namespace UI

@@ -18,6 +18,14 @@ namespace UI
 
         const std::vector<std::shared_ptr<Object>>& Children() const { return mChildren; }
 
+        ObjectSharedPtr FindObjectById(std::string_view id) override;
+
+        template <typename T>
+        std::shared_ptr<T> FindObjectById(std::string_view id)
+        {
+            return std::dynamic_pointer_cast<T>(FindObjectById(id));
+        }
+
     protected:
         void Update() override;
 
@@ -29,7 +37,6 @@ namespace UI
         void DrawImguiChildrenObjects(const bool expand) override;
 
         ObjectSharedPtr FindObjectByPath(std::string_view path) override;
-        ObjectSharedPtr FindObjectById(std::string_view id) override;
 
         int GetImguiObjectTreeDebugNodeData(const bool forceExpand) override;
 

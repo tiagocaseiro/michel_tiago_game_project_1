@@ -35,6 +35,22 @@ void BattleUI::Init()
     mPlayer1HandPanel = UI::FindObjectById<UI::StackPanel>("handPanel1");
     mPlayer2HandPanel = UI::FindObjectById<UI::StackPanel>("handPanel2");
     mFlagsPanel       = UI::FindObjectById<UI::StackPanel>("flagsPanel");
+
+    if(std::shared_ptr<UI::Panel> troopsDrawPileParent = UI::FindObjectById<UI::Panel>("troopsDrawPileParent"))
+    {
+        if(std::shared_ptr<UI::Material> cardParent = troopsDrawPileParent->FindObjectById<UI::Material>("cardParent"))
+        {
+            cardParent->SetColor(Common::Color::Black);
+        }
+    }
+
+    if(std::shared_ptr<UI::Panel> tacticsDrawPileParent = UI::FindObjectById<UI::Panel>("tacticsDrawPileParent"))
+    {
+        if(std::shared_ptr<UI::Material> cardParent = tacticsDrawPileParent->FindObjectById<UI::Material>("cardParent"))
+        {
+            cardParent->SetColor(Common::Color::Black);
+        }
+    }
 }
 
 void InitializeHandCards(UI::StackPanel& handPanel, const Player& player)

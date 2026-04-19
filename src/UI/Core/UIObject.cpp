@@ -166,7 +166,7 @@ namespace UI
             }
             ImGui::Unindent();
 
-            ImGui::Text("Vertical Alignment");
+            ImGui::Text("Horizontal Alignment");
             ImGui::Indent();
             switch(mHorizontalAlignment)
             {
@@ -238,16 +238,24 @@ namespace UI
         {
             case HorizontalAlignment::Left:
             {
-                float leftParentOffset = 0;
-                if(mParent != 0)
+                float parentOffset = 0;
+                if(mParent)
                 {
-                    leftParentOffset = mParent->mPositionDimension.x;
+                    parentOffset = mParent->mPositionDimension.x;
                 }
-                mPositionDimension.x = leftParentOffset + mMargin.left;
+                mPositionDimension.x = parentOffset + mMargin.left;
                 break;
             }
             case HorizontalAlignment::Right:
+            {
+                float parentOffset = 0;
+                if(mParent)
+                {
+                    parentOffset = mParent->mPositionDimension.x + mParent->mPositionDimension.w - mPositionDimension.w;
+                }
+                mPositionDimension.x = parentOffset - mMargin.right;
                 break;
+            }
             case HorizontalAlignment::Center:
             {
                 if(mParent != nullptr)
